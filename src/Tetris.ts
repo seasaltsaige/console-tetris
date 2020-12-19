@@ -23,8 +23,9 @@ export default class Tetris {
         this.#currentPiece = this.#bag[0];
         this.#board = this.genBoard(false);
 
+
         this.#interval = setInterval(() => {
-            this.#board = this.render(this.#currentPiece[0].join(""))
+            this.#board = this.render();
         }, 200);
 
         keypress(stdin);
@@ -49,25 +50,46 @@ export default class Tetris {
         else this.#currentPosX--;
     }
 
-    private render(piece: string) {
+    private render() {
 
-        const boardClone = this.genBoard(true);
+        const boardClone = this.#board;
+
+        // // const boardClone = [...this.#board];
+        // const boardClone = [];
+        // // board.forEach(e => boardClone.push(e.join(" ").replaceAll("current ", "empty").split("")));
+
+
+        for (let j = 0; j < boardClone.length; j++) {
+            for (let i = 0; i < boardClone[0].length; i++) {
+                if (boardClone[j][i] === "current") boardClone[j][i] = "empty";
+            }
+        }
+
+        // this.#previousBoard = boardClone;
+
+        const pieceYLength = this.#currentPiece[this.#currentPiece.current].filter(p => p === "\n").length + 1;
 
         for (let i = 0; i < boardClone[0].length; i++) {
 
             if (i === this.#currentPosX) {
-
                 let additionalY = 0;
                 let x = i;
+
+                if ((this.#currentPosY + pieceYLength) - 20 === 0) {
+                    this.place();
+                    break;
+                }
 
                 for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
                     if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
                         additionalY++;
                         x = i;
-                    } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
-                        boardClone[this.#currentPosY + additionalY][x] = "⚫";
+                    }
+                    else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
+                        boardClone[this.#currentPosY + additionalY][x] = "empty";
                         x++;
-                    } else {
+                    }
+                    else {
                         boardClone[this.#currentPosY + additionalY][x] = this.#currentPiece[this.#currentPiece.current][j];
                         x++;
                     }
@@ -76,7 +98,7 @@ export default class Tetris {
             }
 
         }
-        if (this.#gameCounter % 5 === 0) {
+        if (this.#gameCounter % 5 === 0 && this.#gameCounter !== 0) {
             this.#currentPosY++;
             this.#gameCounter++;
         } else this.#gameCounter++;
@@ -84,15 +106,15 @@ export default class Tetris {
 
         let end = "";
         for (const part of boardClone) end += `${part.join("")}\n`;
+
         console.clear();
-        console.log(end);
+        console.log(end
+            .replaceAll("empty", "⚫")
+            .replaceAll("placed", "⚪")
+            .replaceAll("current", "⚪"));
+        console.log(this.nextUp());
 
-        const toReturn = end.split("\n");
-        const final: string[][] = [];
-
-        for (const part of toReturn) final.push(part.split(""));
-
-        return final;
+        return boardClone;
     }
 
     private genBoard(modified?: boolean) {
@@ -100,7 +122,7 @@ export default class Tetris {
         // if (!modified) {
         for (let i = 0; i < 20; i++) {
             let part: string[] = [];
-            for (let j = 0; j < 10; j++) part.push("⚫");
+            for (let j = 0; j < 10; j++) part.push("empty");
             board.push(part);
         }
         // } else {
@@ -111,8 +133,66 @@ export default class Tetris {
         return board;
     }
 
+    private nextUp() {
+        return `Next Up:\n${this.#bag[1] ? this.#bag[1][0].join("").replaceAll("current", "⚪") : "Please Wait"}`
+    }
+
     private place() {
         this.#bag.shift();
+
+
+        const currentPiece = this.#currentPiece;
+        const x = this.#currentPosX;
+        // const y = 0;
+        const pieceYLength = currentPiece[currentPiece.current].filter(p => p === "\n").length + 1;
+
+        let placedOffset = 0;
+
+        for (let i = 0; i < this.#board[0].length; i++) {
+
+            if (i === x) {
+
+                let additionalY = 0;
+                let xPos = i;
+
+                for (let i = 0; i < pieceYLength; i++) {
+                    if (this.#board[20 - 1 - i][xPos] !== "empty") placedOffset++;
+                }
+
+                for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+                    if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
+                        additionalY++;
+                        xPos = i;
+                    }
+                    else if (this.#currentPiece[this.#currentPiece.current][j] === "  " && this.#board[20 - pieceYLength + additionalY][xPos] !== "placed") {
+                        this.#board[20 - pieceYLength - placedOffset + additionalY][xPos] = "empty";
+                        xPos++;
+                    }
+                    else {
+                        if (this.#board[20 - pieceYLength - placedOffset + additionalY][xPos] !== "placed") {
+                            this.#board[20 - pieceYLength - placedOffset + additionalY][xPos] = "placed";
+                        } else {
+
+                            for (let k = 0; k < this.#board.length; k++) {
+                                if (this.#board[20 - pieceYLength - k - placedOffset + additionalY] && this.#board[20 - pieceYLength - k - placedOffset + additionalY][xPos] === "empty") {
+                                    this.#board[20 - pieceYLength - k - placedOffset + additionalY][xPos] = "placed";
+                                    break;
+                                }
+                            }
+
+                        }
+                        xPos++;
+                    }
+                }
+                break;
+            }
+
+        }
+
+        this.#currentPosX = 4;
+        this.#currentPosY = 0;
+
+        this.#board = this.render();
 
         if (this.#bag.length === 0) {
             this.#bag = this.createBag();

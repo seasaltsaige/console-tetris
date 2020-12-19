@@ -1,51 +1,51 @@
 export const Tetris = [
     {
-        0: ["⚪", "⚪", "\n", "⚪", "\n", "⚪"],
-        1: ["⚪", "⚪", "⚪", "\n", "  ", "  ", "⚪"],  // J Piece
-        2: ["  ", "⚪", "\n", "  ", "⚪", "\n", "⚪", "⚪"],
-        3: ["⚪", "\n", "⚪", "⚪", "⚪"],
+        0: ["current", "current", "\n", "current", "\n", "current"],
+        1: ["current", "current", "current", "\n", "  ", "  ", "current"],  // J Piece
+        2: ["  ", "current", "\n", "  ", "current", "\n", "current", "current"],
+        3: ["current", "\n", "current", "current", "current"],
         current: 0,
     },
     {
-        0: ["  ", "⚪", "\n", "⚪", "⚪", "\n", "⚪"],
-        1: ["⚪", "⚪", "\n", "  ", "⚪", "⚪"], // Z Piece
-        2: ["  ", "⚪", "\n", "⚪", "⚪", "\n", "⚪"],
-        3: ["⚪", "⚪", "\n", "  ", "⚪", "⚪"],
+        0: ["  ", "current", "\n", "current", "current", "\n", "current"],
+        1: ["current", "current", "\n", "  ", "current", "current"], // Z Piece
+        2: ["  ", "current", "\n", "current", "current", "\n", "current"],
+        3: ["current", "current", "\n", "  ", "current", "current"],
         current: 0,
     },
     {
-        0: ["⚪", "⚪", "\n", "  ", "⚪", "\n", "  ", "⚪"],
-        1: ["  ", "  ", "⚪", "\n", "⚪", "⚪", "⚪"], // L piece
-        2: ["⚪", "\n", "⚪", "\n", "⚪", "⚪"],
-        3: ["⚪", "⚪", "⚪", "\n", "⚪"],
+        0: ["current", "current", "\n", "  ", "current", "\n", "  ", "current"],
+        1: ["  ", "  ", "current", "\n", "current", "current", "current"], // L piece
+        2: ["current", "\n", "current", "\n", "current", "current"],
+        3: ["current", "current", "current", "\n", "current"],
         current: 0,
     },
     {
-        0: ["⚪", "\n", "⚪", "⚪", "\n", "  ", "⚪"],
-        1: ["  ", "⚪", "⚪", "\n", "⚪", "⚪"], // S piece
-        2: ["⚪", "\n", "⚪", "⚪", "\n", "  ", "⚪"],
-        3: ["  ", "⚪", "⚪", "\n", "⚪", "⚪"],
+        0: ["current", "\n", "current", "current", "\n", "  ", "current"],
+        1: ["  ", "current", "current", "\n", "current", "current"], // S piece
+        2: ["current", "\n", "current", "current", "\n", "  ", "current"],
+        3: ["  ", "current", "current", "\n", "current", "current"],
         current: 0,
     },
     {
-        0: ["⚪", "\n", "⚪", "\n", "⚪", "\n", "⚪"],
-        1: ["⚪", "⚪", "⚪", "⚪"], // I piece
-        2: ["⚪", "\n", "⚪", "\n", "⚪", "\n", "⚪"],
-        3: ["⚪", "⚪", "⚪", "⚪"],
+        0: ["current", "\n", "current", "\n", "current", "\n", "current"],
+        1: ["current", "current", "current", "current"], // I piece
+        2: ["current", "\n", "current", "\n", "current", "\n", "current"],
+        3: ["current", "current", "current", "current"],
         current: 0,
     },
     {
-        0: ["⚪", "⚪", "\n", "⚪", "⚪"],
-        1: ["⚪", "⚪", "\n", "⚪", "⚪"], // O piece
-        2: ["⚪", "⚪", "\n", "⚪", "⚪"],
-        3: ["⚪", "⚪", "\n", "⚪", "⚪"],
+        0: ["current", "current", "\n", "current", "current"],
+        1: ["current", "current", "\n", "current", "current"], // O piece
+        2: ["current", "current", "\n", "current", "current"],
+        3: ["current", "current", "\n", "current", "current"],
         current: 0,
     },
     {
-        0: ["  ", "⚪", "  ", "\n", "⚪", "⚪", "⚪"],
-        1: ["⚪", "\n", "⚪", "⚪", "\n", "⚪"], // T piece
-        2: ["⚪", "⚪", "⚪", "\n", "  ", "⚪"],
-        3: ["  ", "⚪", "\n", "⚪", "⚪", "\n", "  ", "⚪"],
+        0: ["  ", "current", "  ", "\n", "current", "current", "current"],
+        1: ["current", "\n", "current", "current", "\n", "current"], // T piece
+        2: ["current", "current", "current", "\n", "  ", "current"],
+        3: ["  ", "current", "\n", "current", "current", "\n", "  ", "current"],
         current: 0,
     },
 ];
