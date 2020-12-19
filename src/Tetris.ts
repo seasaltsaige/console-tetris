@@ -1,0 +1,154 @@
+import { stdin } from "process";
+import { Bag } from "./bag.interface";
+import { Tetris as tetris } from "./bag";
+
+export default class Tetris {
+
+    #tetris: Bag[] = tetris;
+    #currentPiece: Bag;
+    #bag: Bag[];
+    #interval: NodeJS.Timeout;
+    #board: string[][];
+    #currentPosX = 4;
+    #currentPosY = 0;
+    #gameCounter = 0;
+
+    constructor() { };
+
+    public async start(): Promise<void> {
+
+        const keypress = require("keypress");
+
+        this.#bag = this.createBag();
+        this.#currentPiece = this.#bag[0];
+        this.#board = this.genBoard(false);
+
+        this.#interval = setInterval(() => {
+            this.#board = this.render(this.#currentPiece[0].join(""))
+        }, 200);
+
+        keypress(stdin);
+
+        stdin.on('keypress', (__, key) => {
+            if (key && key.ctrl && key.name === "c") process.exit();
+            if (key && key.name === "right") this.#currentPiece = this.rotate(this.#currentPiece, "r");
+            if (key && key.name === "left") this.#currentPiece = this.rotate(this.#currentPiece, "l");
+            if (key && key.name === "d") this.move("right");
+            if (key && key.name === "a") this.move("left");
+            if (key && key.name === "down") this.place();
+        });
+
+        stdin.setRawMode(true);
+        stdin.resume();
+    }
+
+    //10x20
+
+    private move(dirrection: "right" | "left") {
+        if (dirrection === "right") this.#currentPosX++;
+        else this.#currentPosX--;
+    }
+
+    private render(piece: string) {
+
+        const boardClone = this.genBoard(true);
+
+        for (let i = 0; i < boardClone[0].length; i++) {
+
+            if (i === this.#currentPosX) {
+
+                let additionalY = 0;
+                let x = i;
+
+                for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+                    if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
+                        additionalY++;
+                        x = i;
+                    } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
+                        boardClone[this.#currentPosY + additionalY][x] = "⚫";
+                        x++;
+                    } else {
+                        boardClone[this.#currentPosY + additionalY][x] = this.#currentPiece[this.#currentPiece.current][j];
+                        x++;
+                    }
+                }
+                break;
+            }
+
+        }
+        if (this.#gameCounter % 5 === 0) {
+            this.#currentPosY++;
+            this.#gameCounter++;
+        } else this.#gameCounter++;
+
+
+        let end = "";
+        for (const part of boardClone) end += `${part.join("")}\n`;
+        console.clear();
+        console.log(end);
+
+        const toReturn = end.split("\n");
+        const final: string[][] = [];
+
+        for (const part of toReturn) final.push(part.split(""));
+
+        return final;
+    }
+
+    private genBoard(modified?: boolean) {
+        const board: string[][] = [];
+        // if (!modified) {
+        for (let i = 0; i < 20; i++) {
+            let part: string[] = [];
+            for (let j = 0; j < 10; j++) part.push("⚫");
+            board.push(part);
+        }
+        // } else {
+        // for (let i = 0; i < 20; i++) {
+        // for (let j = 0; j < 10; j++) board.push(this.#board[j]);
+        // }
+        // }
+        return board;
+    }
+
+    private place() {
+        this.#bag.shift();
+
+        if (this.#bag.length === 0) {
+            this.#bag = this.createBag();
+            this.#currentPiece = this.#bag[0];
+        } else {
+            console.log("Placed Piece");
+            this.#currentPiece = this.#bag[0];
+        }
+
+    }
+
+    private rotate(piece: Bag, dirrection: "l" | "r"): Bag {
+        if (dirrection === "r") {
+            if (piece.current === 3) piece.current = 0;
+            else piece.current++;
+        } else if (dirrection === "l") {
+            if (piece.current === 0) piece.current = 3;
+            else piece.current--;
+        }
+
+        // console.log(piece[piece.current].join("") + "\n\n");
+
+        return piece;
+    }
+
+    private createBag(): Bag[] {
+        const bag: Bag[] = [];
+        const tetrisClone = [...this.#tetris];
+        for (let i = 0; i < 7; i++) {
+            const tetrisIndex = Math.floor(Math.random() * tetrisClone.length);
+            bag.push(tetrisClone[tetrisIndex]);
+            tetrisClone.splice(tetrisIndex, 1);
+        }
+        return bag;
+    }
+
+}
+
+
