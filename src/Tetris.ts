@@ -2,6 +2,7 @@ import { stdin } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
+import { readFileSync, writeFileSync } from "fs";
 
 export default class Tetris {
 
@@ -26,8 +27,8 @@ export default class Tetris {
 
 
         this.#interval = setInterval(() => {
-            this.#board = this.render();
-        }, 200);
+            this.render();
+        }, 100);
 
         keypress(stdin);
 
@@ -36,6 +37,7 @@ export default class Tetris {
             if (key && key.name === "right") this.#currentPiece = this.rotate(this.#currentPiece, "r");
             if (key && key.name === "left") this.#currentPiece = this.rotate(this.#currentPiece, "l");
             if (key && key.name === "d") this.move("right");
+            if (key && key.name === "s") this.move("down");
             if (key && key.name === "a") this.move("left");
             if (key && key.name === "down") this.place();
         });
@@ -45,14 +47,15 @@ export default class Tetris {
     }
 
 
-    private move(dirrection: "right" | "left") {
+    private move(dirrection: "right" | "left" | "down") {
         if (dirrection === "right") this.#currentPosX++;
-        else this.#currentPosX--;
-    }
+        else if (dirrection === "left") this.#currentPosX--;
+        else this.#currentPosY++;
+    }   
 
     private render() {
 
-        const boardClone = this.#board;
+        const boardClone = clone(this.#board);
 
         for (let j = 0; j < boardClone.length; j++) {
             for (let i = 0; i < boardClone[0].length; i++) {
@@ -65,8 +68,6 @@ export default class Tetris {
                 boardClone[j][i] === "current6") boardClone[j][i] = "empty";
             }
         }
-
-        // this.#previousBoard = boardClone;
 
         const pieceYLength = this.#currentPiece[this.#currentPiece.current].filter(p => p === "\n").length + 1;
 
@@ -81,37 +82,43 @@ export default class Tetris {
             if (tempOffset > largestOffset) largestOffset = tempOffset;
         }
 
-        for (let i = 0; i < boardClone[0].length; i++) {
+        let placed = false;
+        let newClone = clone(this.#board);
 
-            if (i === this.#currentPosX) {
-                let additionalY = 0;
-                let x = i;
+        let additionalY = 0;
+        let x = this.#currentPosX;
 
+        if (this.#currentPosY + pieceYLength === 20) return this.place();
 
-                
-                if ((this.#currentPosY + pieceYLength) - 20 === 0) {
-                    this.place();
-                    break;
-                }
+        for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
 
-                for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
-                    if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
-                        additionalY++;
-                        x = i;
-                    }
-                    else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
-                        boardClone[this.#currentPosY + additionalY][x] = "empty";
-                        x++;
-                    }
-                    else {
-                        boardClone[this.#currentPosY + additionalY][x] = this.#currentPiece[this.#currentPiece.current][j];
-                        x++;
-                    }
-                }
+            if (newClone[this.#currentPosY + additionalY + 1] 
+                && newClone[this.#currentPosY + additionalY + 1][x] 
+                && newClone[this.#currentPosY + additionalY + 1][x].includes("placed") 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+
+                placed = true;
                 break;
             }
 
+            if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
+                additionalY++;
+                x = this.#currentPosX;
+            }
+            else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
+                x++;
+            }
+            else {
+                boardClone[this.#currentPosY + additionalY][x] = this.#currentPiece[this.#currentPiece.current][j];
+                x++;
+            }
         }
+
+        if (placed) return this.place();
+
+        this.#board = boardClone;
+
         if (this.#gameCounter % 10 === 0 && this.#gameCounter !== 0) {
             this.#currentPosY++;
             this.#gameCounter++;
