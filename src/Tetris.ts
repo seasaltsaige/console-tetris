@@ -1,6 +1,7 @@
 import { stdin } from "process";
-import { Bag } from "./bag.interface";
-import { Tetris as tetris } from "./bag";
+import { Bag } from "./Utils/bag.interface";
+import { Tetris as tetris } from "./Utils/bag";
+import { clone } from "ramda";
 
 export default class Tetris {
 
@@ -21,7 +22,7 @@ export default class Tetris {
 
         this.#bag = this.createBag();
         this.#currentPiece = this.#bag[0];
-        this.#board = this.genBoard(false);
+        this.#board = this.genBoard();
 
 
         this.#interval = setInterval(() => {
@@ -43,7 +44,6 @@ export default class Tetris {
         stdin.resume();
     }
 
-    //10x20
 
     private move(dirrection: "right" | "left") {
         if (dirrection === "right") this.#currentPosX++;
@@ -54,14 +54,15 @@ export default class Tetris {
 
         const boardClone = this.#board;
 
-        // // const boardClone = [...this.#board];
-        // const boardClone = [];
-        // // board.forEach(e => boardClone.push(e.join(" ").replaceAll("current ", "empty").split("")));
-
-
         for (let j = 0; j < boardClone.length; j++) {
             for (let i = 0; i < boardClone[0].length; i++) {
-                if (boardClone[j][i] === "current") boardClone[j][i] = "empty";
+                if (boardClone[j][i] === "current" || 
+                boardClone[j][i] === "current1" || 
+                boardClone[j][i] === "current2" || 
+                boardClone[j][i] === "current3" ||
+                boardClone[j][i] === "current4" ||  
+                boardClone[j][i] === "current5" || 
+                boardClone[j][i] === "current6") boardClone[j][i] = "empty";
             }
         }
 
@@ -69,12 +70,25 @@ export default class Tetris {
 
         const pieceYLength = this.#currentPiece[this.#currentPiece.current].filter(p => p === "\n").length + 1;
 
+        let largestOffset = 1;
+
+        for (let p = 0; p < 4; p++) {
+            const currentXPos = this.#currentPosX + p;
+            let tempOffset = 0;
+            for (let y = 0; y < this.#board.length; y++) {
+                if (this.#board[y][currentXPos] !== "empty") tempOffset++;
+            }
+            if (tempOffset > largestOffset) largestOffset = tempOffset;
+        }
+
         for (let i = 0; i < boardClone[0].length; i++) {
 
             if (i === this.#currentPosX) {
                 let additionalY = 0;
                 let x = i;
 
+
+                
                 if ((this.#currentPosY + pieceYLength) - 20 === 0) {
                     this.place();
                     break;
@@ -98,7 +112,7 @@ export default class Tetris {
             }
 
         }
-        if (this.#gameCounter % 5 === 0 && this.#gameCounter !== 0) {
+        if (this.#gameCounter % 10 === 0 && this.#gameCounter !== 0) {
             this.#currentPosY++;
             this.#gameCounter++;
         } else this.#gameCounter++;
@@ -110,98 +124,118 @@ export default class Tetris {
         console.clear();
         console.log(end
             .replaceAll("empty", "⚫")
+
+            .replaceAll("placed1", "🔴")
+            .replaceAll("placed2", "🟣")
+            .replaceAll("placed3", "🟠")
+            .replaceAll("placed4", "🟡")
+            .replaceAll("placed5", "🟢")
+            .replaceAll("placed6", "🟤")
+
             .replaceAll("placed", "⚪")
-            .replaceAll("current", "⚪"));
+            .replaceAll("current1", "🔴")
+            .replaceAll("current2", "🟣")
+            .replaceAll("current3", "🟠")
+            .replaceAll("current4", "🟡")
+            .replaceAll("current5", "🟢")
+            .replaceAll("current6", "🟤")
+            .replaceAll("current", "⚪")
+            );
         console.log(this.nextUp());
 
         return boardClone;
     }
 
-    private genBoard(modified?: boolean) {
+    private genBoard() {
         const board: string[][] = [];
-        // if (!modified) {
         for (let i = 0; i < 20; i++) {
             let part: string[] = [];
             for (let j = 0; j < 10; j++) part.push("empty");
             board.push(part);
         }
-        // } else {
-        // for (let i = 0; i < 20; i++) {
-        // for (let j = 0; j < 10; j++) board.push(this.#board[j]);
-        // }
-        // }
         return board;
     }
 
     private nextUp() {
-        return `Next Up:\n${this.#bag[1] ? this.#bag[1][0].join("").replaceAll("current", "⚪") : "Please Wait"}`
+        return `Next Up:\n${this.#bag[1] ? this.#bag[1][0].join("").replaceAll("current1", "🔴")
+        .replaceAll("current2", "🟣")
+        .replaceAll("current3", "🟠")
+        .replaceAll("current4", "🟡")
+        .replaceAll("current5", "🟢")
+        .replaceAll("current6", "🟤")
+        .replaceAll("current", "⚪") : "Please Wait"}`
     }
 
     private place() {
         this.#bag.shift();
-
-
         const currentPiece = this.#currentPiece;
         const x = this.#currentPosX;
-        // const y = 0;
         const pieceYLength = currentPiece[currentPiece.current].filter(p => p === "\n").length + 1;
 
-        let placedOffset = 0;
-
-        for (let i = 0; i < this.#board[0].length; i++) {
-
-            if (i === x) {
-
-                let additionalY = 0;
-                let xPos = i;
-
-                for (let i = 0; i < pieceYLength; i++) {
-                    if (this.#board[20 - 1 - i][xPos] !== "empty") placedOffset++;
+        let xPos = x;
+        let extraY = 0;
+        let boardClone = clone(this.#board);
+        let i = 20;
+        const draw = () => {
+            
+            let clipped = false;
+            for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+                if (boardClone[i - pieceYLength + extraY][xPos] && boardClone[i - pieceYLength + extraY][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][j] !== "  " && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+                    clipped = true;
+                    i--;
+                    xPos = x;
+                    extraY = 0;
+                    boardClone = clone(this.#board);
+                        
+                    break;
+                } 
+                
+                if (this.checkAbove(clone(this.#board), i - pieceYLength + extraY, xPos, j)) {                    clipped = true;
+                    i--;
+                    xPos = x;
+                    extraY = 0;
+                    boardClone = clone(this.#board);
+                        
+                    break;
                 }
 
-                for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
-                    if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
-                        additionalY++;
-                        xPos = i;
-                    }
-                    else if (this.#currentPiece[this.#currentPiece.current][j] === "  " && this.#board[20 - pieceYLength + additionalY][xPos] !== "placed") {
-                        this.#board[20 - pieceYLength - placedOffset + additionalY][xPos] = "empty";
-                        xPos++;
-                    }
-                    else {
-                        if (this.#board[20 - pieceYLength - placedOffset + additionalY][xPos] !== "placed") {
-                            this.#board[20 - pieceYLength - placedOffset + additionalY][xPos] = "placed";
-                        } else {
-
-                            for (let k = 0; k < this.#board.length; k++) {
-                                if (this.#board[20 - pieceYLength - k - placedOffset + additionalY] && this.#board[20 - pieceYLength - k - placedOffset + additionalY][xPos] === "empty") {
-                                    this.#board[20 - pieceYLength - k - placedOffset + additionalY][xPos] = "placed";
-                                    break;
-                                }
-                            }
-
-                        }
-                        xPos++;
-                    }
+                if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
+                    extraY++;
+                    xPos = x;
+                } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
+                    xPos++;
+                } else {
+                    const numToAdd = this.#currentPiece[this.#currentPiece.current].filter(p => p !== "  " && p !== "\n")[0][7] ? this.#currentPiece[this.#currentPiece.current].filter(p => p !== "  " && p !== "\n")[0][7] : "";
+                    boardClone[i - pieceYLength + extraY][xPos] = `placed${numToAdd}`;
+                    xPos++;
                 }
-                break;
             }
 
-        }
+            if (clipped) return draw();
+            else this.#board = boardClone;
+        } 
+        draw();
 
         this.#currentPosX = 4;
         this.#currentPosY = 0;
 
-        this.#board = this.render();
-
         if (this.#bag.length === 0) {
             this.#bag = this.createBag();
             this.#currentPiece = this.#bag[0];
-        } else {
-            console.log("Placed Piece");
-            this.#currentPiece = this.#bag[0];
-        }
+        } else this.#currentPiece = this.#bag[0];
+        
 
+    }
+
+    private checkAbove(board: string[][], yPos: number, xPos: number, pieceNum: number) {
+        let placedAbove = false;
+        for (let i = yPos; i > 0; i--) {
+            if (board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
+                placedAbove = true;
+                break;
+            }
+        }
+        return placedAbove;
     }
 
     private rotate(piece: Bag, dirrection: "l" | "r"): Bag {
