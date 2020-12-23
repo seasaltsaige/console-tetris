@@ -1,4 +1,4 @@
-import { stdin } from "process";
+import { stdin, stdout } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
@@ -15,17 +15,18 @@ export default class Tetris {
     #gameCounter = 0;
     #score = 0;
 
+    #level = 1;
+    #clearedRows = 0;
+    #maxRows = 10;
+
     constructor() { };
 
     public async start(): Promise<void> {
-
         const keypress = require("keypress");
 
         this.#bag = this.createBag();
         this.#currentPiece = this.#bag[0];
         this.#board = this.genBoard();
-
-
         this.#interval = setInterval(() => {
             this.render();
         }, 100);
@@ -33,8 +34,7 @@ export default class Tetris {
         keypress(stdin);
 
         stdin.on('keypress', (__, key) => {
-            if (key && key.ctrl && key.name === "c") process.exit();
-            if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
+            if (key && key.ctrl && key.name === "c") process.exit();                if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
             if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
             if (key && key.name === "d" && this.#interval !== false) this.move("right");
             if (key && key.name === "s" && this.#interval !== false) this.move("down");
@@ -87,9 +87,42 @@ export default class Tetris {
         else if (clearedRows === 2) this.#score += 100;
         else if (clearedRows === 3) this.#score += 300;
         else if (clearedRows === 4) this.#score += 1200;
+
+        this.#clearedRows += clearedRows;
+
+        if (this.#clearedRows >= this.#maxRows) {
+            this.#clearedRows -= 10;
+            this.#level++;
+        }
         
 
         return clonedBoard;
+
+    }
+
+    private async clearFlash(board: string[][], color: string, row: number, first: number, second: number) {
+
+        board[row][first] = color;
+        board[row][second] = color;
+        console.clear();
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+
+        await this.sleep(200);
+        console.clear();
+
+        board[row][first] = "empty";
+        board[row][second] = "empty";
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+
+        await this.sleep(300);
 
     }
 
@@ -100,105 +133,11 @@ export default class Tetris {
             this.#interval = false;
         }
 
-        board[row][4] = color;
-        board[row][5] = color;
-        console.clear();
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(200);
-        console.clear();
-
-        board[row][4] = "empty";
-        board[row][5] = "empty";
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(300);
-        console.clear();
-
-        board[row][3] = color;
-        board[row][6] = color;
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(200);
-        console.clear();
-
-        board[row][3] = "empty";
-        board[row][6] = "empty";
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(300);
-        console.clear();
-
-        board[row][2] = color;
-        board[row][7] = color;
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-        
-        await this.sleep(200);
-        console.clear();
-
-        board[row][2] = "empty";
-        board[row][7] = "empty";
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(300);
-        console.clear();
-
-        board[row][1] = color;
-        board[row][8] = color;
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(200);
-        console.clear();
-
-        board[row][1] = "empty";
-        board[row][8] = "empty";
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(300);
-        console.clear();
-
-        board[row][0] = color;
-        board[row][9] = color;
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        await this.sleep(200);
-        console.clear();
-
-        board[row][0] = "empty";
-        board[row][9] = "empty";
-
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
-
-        console.clear();
+        await this.clearFlash(board, color, row, 4, 5);
+        await this.clearFlash(board, color, row, 3, 6);
+        await this.clearFlash(board, color, row, 2, 7);
+        await this.clearFlash(board, color, row, 1, 8);
+        await this.clearFlash(board, color, row, 0, 9);
 
         if (modifyInterval) {
             this.#interval = setInterval(() => {
@@ -260,6 +199,8 @@ export default class Tetris {
 
         const boardClone = clone(this.#board);
 
+        const moduloCheck = this.#level === 1 ? 10 : this.#level === 2 ? 9 : this.#level === 3 ? 8 : this.#level === 4 ? 7 : this.#level === 5 ? 6 : 5;
+
         for (let j = 0; j < boardClone.length; j++) {
             for (let i = 0; i < boardClone[0].length; i++) {
                 if (boardClone[j][i] === "current" || 
@@ -295,7 +236,8 @@ export default class Tetris {
 
         for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
 
-            if (newClone[this.#currentPosY + additionalY + 1] 
+            if (this.#gameCounter % moduloCheck === 0
+                && newClone[this.#currentPosY + additionalY + 1] 
                 && newClone[this.#currentPosY + additionalY + 1][x] 
                 && newClone[this.#currentPosY + additionalY + 1][x].includes("placed") 
                 && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
@@ -322,13 +264,14 @@ export default class Tetris {
 
         this.#board = boardClone;
 
-        if (this.#gameCounter % 10 === 0 && this.#gameCounter !== 0) {
+        if (this.#gameCounter % moduloCheck === 0 && this.#gameCounter !== 0) {
             this.#currentPosY++;
             this.#gameCounter++;
         } else this.#gameCounter++;
 
         console.clear();
         console.log(`Your current score is: ${this.#score}`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
         console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
@@ -491,6 +434,7 @@ export default class Tetris {
         this.#board = flashOne;
 
         console.log(`Your current score is: ${this.#score}`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
         console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
@@ -500,6 +444,7 @@ export default class Tetris {
         this.#board = flashTwo;
 
         console.log(`Your current score is: ${this.#score}`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
         console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
