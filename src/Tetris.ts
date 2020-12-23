@@ -7,7 +7,10 @@ export default class Tetris {
 
     #tetris: Bag[] = tetris;
     #currentPiece: Bag;
+
     #bag: Bag[];
+    #secondBag: Bag[];
+
     #interval: NodeJS.Timeout | boolean;
     #board: string[][];
     #currentPosX = 4;
@@ -22,9 +25,17 @@ export default class Tetris {
     constructor() { };
 
     public async start(): Promise<void> {
+
+        console.clear();
+        console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n\nThe game will start in about 10 seconds.`)
+
+        await this.sleep(15000);
+
         const keypress = require("keypress");
 
         this.#bag = this.createBag();
+        this.#secondBag = this.createBag();
+
         this.#currentPiece = this.#bag[0];
         this.#board = this.genBoard();
         this.#interval = setInterval(() => {
@@ -310,14 +321,24 @@ export default class Tetris {
     }
 
     private nextUp() {
-        return `Next Up:\n${this.#bag[1] ? this.#bag[1][0].join("")
+        return `Next Up:\n${this.#bag[1] ? 
+        this.#bag[1][0].join("")
         .replaceAll("current1", "🟥")
         .replaceAll("current2", "🟪")
         .replaceAll("current3", "🟧")
         .replaceAll("current4", "🟨")
         .replaceAll("current5", "🟩")
         .replaceAll("current6", "🟫")
-        .replaceAll("current", "🟦") : "Please Wait"}`
+        .replaceAll("current", "🟦") 
+        : 
+        this.#secondBag[0][0].join("")
+        .replaceAll("current1", "🟥")
+        .replaceAll("current2", "🟪")
+        .replaceAll("current3", "🟧")
+        .replaceAll("current4", "🟨")
+        .replaceAll("current5", "🟩")
+        .replaceAll("current6", "🟫")
+        .replaceAll("current", "🟦")}`
     }
 
     private async place() {
@@ -384,7 +405,8 @@ export default class Tetris {
         this.#currentPosY = 0;
 
         if (this.#bag.length === 0) {
-            this.#bag = this.createBag();
+            this.#bag = this.#secondBag;
+            this.#secondBag = this.createBag();
             this.#currentPiece = this.#bag[0];
         } else this.#currentPiece = this.#bag[0];
         
@@ -424,7 +446,14 @@ export default class Tetris {
         const bigFontScore = this.#score.toString();
         console.log(`
         █▄█ █▀█ █░█   █▀ █▀▀ █▀█ █▀█ █▀▀ █▀▄ ${bigFontScore.replaceAll(/\d/g, " ")}  █▀█ █▀█ █ █▄░█ ▀█▀ █▀
-        ░█░ █▄█ █▄█   ▄█ █▄▄ █▄█ █▀▄ ██▄ █▄▀ ${bigFontScore}  █▀▀ █▄█ █ █░▀█ ░█░ ▄█`)
+        ░█░ █▄█ █▄█   ▄█ █▄▄ █▄█ █▀▄ ██▄ █▄▀ ${bigFontScore}  █▀▀ █▄█ █ █░▀█ ░█░ ▄█`);
+
+        console.log(`
+        ┏━┳━┓╋╋╋┏┓╋╋┏┓╋╋╋┏━┳━┓╋╋╋╋┏┳━┳┓┏┓╋╋╋╋╋╋╋╋╋┏━┓
+        ┃┃┃┃┣━┓┏┛┣━┓┃┗┳┳┓┃┃┃┃┣━┓┏┳╋┫━┫┗┫┗┳━┳━━┳━┳━┫━╋━┓
+        ┃┃┃┃┃╋┗┫╋┃┻┫┃╋┃┃┃┃┃┃┃┃╋┗╋┃┫┣━┃┏┫┃┃┻┫┃┃┃╋┃╋┣━┃┻┫
+        ┗┻━┻┻━━┻━┻━┛┗━╋┓┃┗┻━┻┻━━┻┻┻┻━┻━┻┻┻━┻┻┻┻━┻━┻━┻━┛
+        ╋╋╋╋╋╋╋╋╋╋╋╋╋╋┗━┛`);
 
 
     }
