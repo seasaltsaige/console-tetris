@@ -396,7 +396,7 @@ export default class Tetris {
             }
 
             if (clipped) return draw();
-            // else if (lost) this.lose();
+            else if (lost) return this.lose();
             else this.#board = boardClone;
         } 
         draw();
@@ -411,6 +411,63 @@ export default class Tetris {
         
         this.#board = await this.score();
 
+    }
+
+    private async lose() {
+        clearInterval(<NodeJS.Timeout>this.#interval);
+
+        console.clear();
+
+        const whiteFlash = this.genBoard();
+        const redFlash: string[][] = [];
+
+        for (let i = 0; i < 20; i++) {
+            redFlash.push("🟥".repeat(10).split(""));
+        }
+
+        await this.flash(whiteFlash, redFlash);
+        await this.flash(whiteFlash, redFlash);
+        await this.flash(whiteFlash, redFlash);
+        await this.flash(whiteFlash, redFlash);
+        await this.flash(whiteFlash, redFlash);
+
+
+        console.log(`
+        
+░██████╗░░█████╗░███╗░░░███╗███████╗  ░█████╗░██╗░░░██╗███████╗██████╗░
+██╔════╝░██╔══██╗████╗░████║██╔════╝  ██╔══██╗██║░░░██║██╔════╝██╔══██╗
+██║░░██╗░███████║██╔████╔██║█████╗░░  ██║░░██║╚██╗░██╔╝█████╗░░██████╔╝
+██║░░╚██╗██╔══██║██║╚██╔╝██║██╔══╝░░  ██║░░██║░╚████╔╝░██╔══╝░░██╔══██╗
+╚██████╔╝██║░░██║██║░╚═╝░██║███████╗  ╚█████╔╝░░╚██╔╝░░███████╗██║░░██║
+░╚═════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝  ░╚════╝░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝`);
+
+
+        const bigFontScore = this.#score.toString();
+        console.log(`
+        █▄█ █▀█ █░█   █▀ █▀▀ █▀█ █▀█ █▀▀ █▀▄ ${bigFontScore.replaceAll(/\d/g, " ")}  █▀█ █▀█ █ █▄░█ ▀█▀ █▀
+        ░█░ █▄█ █▄█   ▄█ █▄▄ █▄█ █▀▄ ██▄ █▄▀ ${bigFontScore}  █▀▀ █▄█ █ █░▀█ ░█░ ▄█`)
+
+
+    }
+
+    private async flash(flashOne: string[][], flashTwo: string[][]) {
+        console.clear();
+        this.#board = flashOne;
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(this.#board));
+        console.log(this.nextUp());
+
+        await this.sleep(500);
+
+        console.clear();
+        this.#board = flashTwo;
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(this.#board));
+        console.log(this.nextUp());
+
+        await this.sleep(500);
     }
 
     private checkAbove(board: string[][], yPos: number, xPos: number, pieceNum: number) {
@@ -436,9 +493,7 @@ export default class Tetris {
         if (piece.xLength[piece.current] + this.#currentPosX > this.#board[0].length - 1) {
             const amountToMove = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
             this.#currentPosX -= amountToMove;
-        } 
-
-        // console.log(piece[piece.current].join("") + "\n\n");
+        }
 
         return piece;
     }
