@@ -2,14 +2,13 @@ import { stdin } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
-import { clear } from "console";
 
 export default class Tetris {
 
     #tetris: Bag[] = tetris;
     #currentPiece: Bag;
     #bag: Bag[];
-    #interval: NodeJS.Timeout;
+    #interval: NodeJS.Timeout | boolean;
     #board: string[][];
     #currentPosX = 4;
     #currentPosY = 0;
@@ -35,12 +34,12 @@ export default class Tetris {
 
         stdin.on('keypress', (__, key) => {
             if (key && key.ctrl && key.name === "c") process.exit();
-            if (key && key.name === "right") this.#currentPiece = this.rotate(this.#currentPiece, "r");
-            if (key && key.name === "left") this.#currentPiece = this.rotate(this.#currentPiece, "l");
-            if (key && key.name === "d") this.move("right");
-            if (key && key.name === "s") this.move("down");
-            if (key && key.name === "a") this.move("left");
-            if (key && key.name === "down") this.place();
+            if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
+            if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
+            if (key && key.name === "d" && this.#interval !== false) this.move("right");
+            if (key && key.name === "s" && this.#interval !== false) this.move("down");
+            if (key && key.name === "a" && this.#interval !== false) this.move("left");
+            if (key && key.name === "down" && this.#interval !== false) this.place();
         });
 
         stdin.setRawMode(true);
@@ -51,8 +50,9 @@ export default class Tetris {
 
         let clearedRows = 0;
         const clonedBoard = clone(this.#board);
-         
 
+        let rowIndexsToClear: number[] = [];
+         
         for (let i = 0; i <= 19; i++) {
 
             let clear = true;
@@ -68,16 +68,18 @@ export default class Tetris {
             }
 
             if (clear) {
-
-                await this.clearAnimation(clonedBoard, i);
-
-                clonedBoard.splice(i, 1);
-
-                clonedBoard.unshift(["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"])
-
+                rowIndexsToClear.push(i);
                 clearedRows++;
             }
 
+        }
+
+        if (rowIndexsToClear.length > 0) {
+            rowIndexsToClear.forEach(async (index, i) => {
+                await this.clearAnimation(clonedBoard, index, i === 0 ? true : false);
+                clonedBoard.splice(index, 1);
+                clonedBoard.unshift(["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"])
+            });
         }
 
         if (clearedRows === 1) this.#score += 40;
@@ -90,122 +92,118 @@ export default class Tetris {
 
     }
 
-    private async clearAnimation(board: string[][], row: number) {
+    private async clearAnimation(board: string[][], row: number, modifyInterval: boolean) {
 
-        clearInterval(this.#interval);
+        if (this.#interval !== false && modifyInterval) {
+            clearInterval(<NodeJS.Timeout>this.#interval);
+            this.#interval = false;
+        }
 
-        const oldPart = [...board[row]];
+        board[row][4] = "⚪";
+        board[row][5] = "⚪";
+        console.clear();
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+
+        await this.sleep(100);
+        console.clear();
+
+        board[row][4] = "empty";
+        board[row][5] = "empty";
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+
+        await this.sleep(200);
+        console.clear();
+
+        board[row][3] = "⚪";
+        board[row][6] = "⚪";
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+
+        await this.sleep(100);
+        console.clear();
+
+        board[row][3] = "empty";
+        board[row][6] = "empty";
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+
+        await this.sleep(200);
+        console.clear();
+
+        board[row][2] = "⚪";
+        board[row][7] = "⚪";
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
         
-        const flash = ["⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪"];
-
-        board[row] = flash;
+        await this.sleep(100);
         console.clear();
 
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(board.map(p => p.join("")).join("\n")
-            .replaceAll("empty", "⚫")
+        board[row][2] = "empty";
+        board[row][7] = "empty";
 
-            .replaceAll("placed1", "🔴")
-            .replaceAll("placed2", "🟣")
-            .replaceAll("placed3", "🟠")
-            .replaceAll("placed4", "🟡")
-            .replaceAll("placed5", "🟢")
-            .replaceAll("placed6", "🟤")
-            .replaceAll("placed", "⚪")
-            .replaceAll("current1", "🔴")
-            .replaceAll("current2", "🟣")
-            .replaceAll("current3", "🟠")
-            .replaceAll("current4", "🟡")
-            .replaceAll("current5", "🟢")
-            .replaceAll("current6", "🟤")
-            .replaceAll("current", "⚪")
-        );
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(400);
+        await this.sleep(200);
         console.clear();
 
-        board[row] = oldPart;
+        board[row][1] = "⚪";
+        board[row][8] = "⚪";
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(board.map(p => p.join("")).join("\n")
-            .replaceAll("empty", "⚫")
-
-            .replaceAll("placed1", "🔴")
-            .replaceAll("placed2", "🟣")
-            .replaceAll("placed3", "🟠")
-            .replaceAll("placed4", "🟡")
-            .replaceAll("placed5", "🟢")
-            .replaceAll("placed6", "🟤")
-            .replaceAll("placed", "⚪")
-            .replaceAll("current1", "🔴")
-            .replaceAll("current2", "🟣")
-            .replaceAll("current3", "🟠")
-            .replaceAll("current4", "🟡")
-            .replaceAll("current5", "🟢")
-            .replaceAll("current6", "🟤")
-            .replaceAll("current", "⚪")
-        );
+        console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(400);
+        await this.sleep(100);
         console.clear();
 
-        board[row] = flash;
+        board[row][1] = "empty";
+        board[row][8] = "empty";
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(board.map(p => p.join("")).join("\n")
-            .replaceAll("empty", "⚫")
-
-            .replaceAll("placed1", "🔴")
-            .replaceAll("placed2", "🟣")
-            .replaceAll("placed3", "🟠")
-            .replaceAll("placed4", "🟡")
-            .replaceAll("placed5", "🟢")
-            .replaceAll("placed6", "🟤")
-            .replaceAll("placed", "⚪")
-            .replaceAll("current1", "🔴")
-            .replaceAll("current2", "🟣")
-            .replaceAll("current3", "🟠")
-            .replaceAll("current4", "🟡")
-            .replaceAll("current5", "🟢")
-            .replaceAll("current6", "🟤")
-            .replaceAll("current", "⚪")
-        );
+        console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(400);
+        await this.sleep(200);
         console.clear();
 
-        board[row] = oldPart;
+        board[row][0] = "⚪";
+        board[row][9] = "⚪";
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(board.map(p => p.join("")).join("\n")
-            .replaceAll("empty", "⚫")
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
 
-            .replaceAll("placed1", "🔴")
-            .replaceAll("placed2", "🟣")
-            .replaceAll("placed3", "🟠")
-            .replaceAll("placed4", "🟡")
-            .replaceAll("placed5", "🟢")
-            .replaceAll("placed6", "🟤")
-            .replaceAll("placed", "⚪")
-            .replaceAll("current1", "🔴")
-            .replaceAll("current2", "🟣")
-            .replaceAll("current3", "🟠")
-            .replaceAll("current4", "🟡")
-            .replaceAll("current5", "🟢")
-            .replaceAll("current6", "🟤")
-            .replaceAll("current", "⚪")
-        );
+        await this.sleep(100);
+        console.clear();
+
+        board[row][0] = "empty";
+        board[row][9] = "empty";
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(this.showBoard(board));
         console.log(this.nextUp());
 
         console.clear();
 
-        this.#interval = setInterval(() => {
-            this.render();
-        }, 100);
-
+        if (modifyInterval) {
+            this.#interval = setInterval(() => {
+                this.render();
+            }, 100);
+        }
     }
 
     private sleep(ms: number) {
@@ -292,31 +290,9 @@ export default class Tetris {
             this.#gameCounter++;
         } else this.#gameCounter++;
 
-
-        let end = "";
-        for (const part of boardClone) end += `${part.join("")}\n`;
-
         console.clear();
         console.log(`Your current score is: ${this.#score}`);
-        console.log(end
-            .replaceAll("empty", "⚫")
-
-            .replaceAll("placed1", "🔴")
-            .replaceAll("placed2", "🟣")
-            .replaceAll("placed3", "🟠")
-            .replaceAll("placed4", "🟡")
-            .replaceAll("placed5", "🟢")
-            .replaceAll("placed6", "🟤")
-
-            .replaceAll("placed", "⚪")
-            .replaceAll("current1", "🔴")
-            .replaceAll("current2", "🟣")
-            .replaceAll("current3", "🟠")
-            .replaceAll("current4", "🟡")
-            .replaceAll("current5", "🟢")
-            .replaceAll("current6", "🟤")
-            .replaceAll("current", "⚪")
-        );
+        console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
         return boardClone;
@@ -330,6 +306,26 @@ export default class Tetris {
             board.push(part);
         }
         return board;
+    }
+
+    private showBoard(board: string[][]) {
+        return board.map(p => p.join("")).join("\n")
+            .replaceAll("empty", "⚫")
+
+            .replaceAll("placed1", "🔴")
+            .replaceAll("placed2", "🟣")
+            .replaceAll("placed3", "🟠")
+            .replaceAll("placed4", "🟡")
+            .replaceAll("placed5", "🟢")
+            .replaceAll("placed6", "🟤")
+            .replaceAll("placed", "⚪")
+            .replaceAll("current1", "🔴")
+            .replaceAll("current2", "🟣")
+            .replaceAll("current3", "🟠")
+            .replaceAll("current4", "🟡")
+            .replaceAll("current5", "🟢")
+            .replaceAll("current6", "🟤")
+            .replaceAll("current", "⚪");
     }
 
     private nextUp() {
