@@ -2,7 +2,7 @@ import { stdin } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
-import { readFileSync, writeFileSync } from "fs";
+import { clear } from "console";
 
 export default class Tetris {
 
@@ -14,6 +14,7 @@ export default class Tetris {
     #currentPosX = 4;
     #currentPosY = 0;
     #gameCounter = 0;
+    #score = 0;
 
     constructor() { };
 
@@ -46,6 +47,58 @@ export default class Tetris {
         stdin.resume();
     }
 
+    private score() {
+        /**
+         * 40 pts for 1 line
+         * 100 pts for 2 lines
+         * 300 pts for 3 lines
+         * 1200 pts for 4 lines
+         */
+
+        // Lines to check, 16 - 20 (15 - 19)
+        // Check each line, starting from the bottom on each render
+        // If the line is completely full of placed pieces, remove the row,
+        // Add 1 to a counter, then once all 4 rows are checked & cleared if
+        // need be, add X points to the users score and move the rest of the pieces
+        // down to the bottom level.
+
+        let clearedRows = 0;
+        const clonedBoard = clone(this.#board);
+        // const startValue = 19;
+
+        for (let i = 0; i <= 19; i++) {
+
+            let clear = true;
+
+            for (let j = 0; j < clonedBoard[0].length; j++) {
+
+                const boardPart = clonedBoard[i][j];
+                if (!boardPart.includes("placed")) {
+                    clear = false;
+                    break;
+                }
+
+            }
+
+            if (clear) {
+                clonedBoard.splice(i, 1);
+
+                clonedBoard.unshift(["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"])
+
+                clearedRows++;
+            }
+
+        }
+
+        if (clearedRows === 1) this.#score += 40;
+        else if (clearedRows === 2) this.#score += 100;
+        else if (clearedRows === 3) this.#score += 300;
+        else if (clearedRows === 4) this.#score += 1200;
+        
+
+        return clonedBoard;
+
+    }
 
     private move(dirrection: "right" | "left" | "down") {
         if (dirrection === "right") this.#currentPosX++;
@@ -129,6 +182,7 @@ export default class Tetris {
         for (const part of boardClone) end += `${part.join("")}\n`;
 
         console.clear();
+        console.log(`Your current score is: ${this.#score}`);
         console.log(end
             .replaceAll("empty", "⚫")
 
@@ -174,6 +228,7 @@ export default class Tetris {
     }
 
     private place() {
+
         this.#bag.shift();
         const currentPiece = this.#currentPiece;
         const x = this.#currentPosX;
@@ -231,6 +286,7 @@ export default class Tetris {
             this.#currentPiece = this.#bag[0];
         } else this.#currentPiece = this.#bag[0];
         
+        this.#board = this.score();
 
     }
 
