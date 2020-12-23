@@ -3,5 +3,6 @@ export interface Bag {
     1: string[];
     2: string[];
     3: string[];
+    xLength: number[];
     current: number;
 }

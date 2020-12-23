@@ -47,24 +47,11 @@ export default class Tetris {
         stdin.resume();
     }
 
-    private score() {
-        /**
-         * 40 pts for 1 line
-         * 100 pts for 2 lines
-         * 300 pts for 3 lines
-         * 1200 pts for 4 lines
-         */
-
-        // Lines to check, 16 - 20 (15 - 19)
-        // Check each line, starting from the bottom on each render
-        // If the line is completely full of placed pieces, remove the row,
-        // Add 1 to a counter, then once all 4 rows are checked & cleared if
-        // need be, add X points to the users score and move the rest of the pieces
-        // down to the bottom level.
+    private async score() {
 
         let clearedRows = 0;
         const clonedBoard = clone(this.#board);
-        // const startValue = 19;
+         
 
         for (let i = 0; i <= 19; i++) {
 
@@ -81,6 +68,9 @@ export default class Tetris {
             }
 
             if (clear) {
+
+                await this.clearAnimation(clonedBoard, i);
+
                 clonedBoard.splice(i, 1);
 
                 clonedBoard.unshift(["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"])
@@ -100,10 +90,135 @@ export default class Tetris {
 
     }
 
+    private async clearAnimation(board: string[][], row: number) {
+
+        clearInterval(this.#interval);
+
+        const oldPart = [...board[row]];
+        
+        const flash = ["⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪", "⚪"];
+
+        board[row] = flash;
+        console.clear();
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(board.map(p => p.join("")).join("\n")
+            .replaceAll("empty", "⚫")
+
+            .replaceAll("placed1", "🔴")
+            .replaceAll("placed2", "🟣")
+            .replaceAll("placed3", "🟠")
+            .replaceAll("placed4", "🟡")
+            .replaceAll("placed5", "🟢")
+            .replaceAll("placed6", "🟤")
+            .replaceAll("placed", "⚪")
+            .replaceAll("current1", "🔴")
+            .replaceAll("current2", "🟣")
+            .replaceAll("current3", "🟠")
+            .replaceAll("current4", "🟡")
+            .replaceAll("current5", "🟢")
+            .replaceAll("current6", "🟤")
+            .replaceAll("current", "⚪")
+        );
+        console.log(this.nextUp());
+
+        await this.sleep(400);
+        console.clear();
+
+        board[row] = oldPart;
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(board.map(p => p.join("")).join("\n")
+            .replaceAll("empty", "⚫")
+
+            .replaceAll("placed1", "🔴")
+            .replaceAll("placed2", "🟣")
+            .replaceAll("placed3", "🟠")
+            .replaceAll("placed4", "🟡")
+            .replaceAll("placed5", "🟢")
+            .replaceAll("placed6", "🟤")
+            .replaceAll("placed", "⚪")
+            .replaceAll("current1", "🔴")
+            .replaceAll("current2", "🟣")
+            .replaceAll("current3", "🟠")
+            .replaceAll("current4", "🟡")
+            .replaceAll("current5", "🟢")
+            .replaceAll("current6", "🟤")
+            .replaceAll("current", "⚪")
+        );
+        console.log(this.nextUp());
+
+        await this.sleep(400);
+        console.clear();
+
+        board[row] = flash;
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(board.map(p => p.join("")).join("\n")
+            .replaceAll("empty", "⚫")
+
+            .replaceAll("placed1", "🔴")
+            .replaceAll("placed2", "🟣")
+            .replaceAll("placed3", "🟠")
+            .replaceAll("placed4", "🟡")
+            .replaceAll("placed5", "🟢")
+            .replaceAll("placed6", "🟤")
+            .replaceAll("placed", "⚪")
+            .replaceAll("current1", "🔴")
+            .replaceAll("current2", "🟣")
+            .replaceAll("current3", "🟠")
+            .replaceAll("current4", "🟡")
+            .replaceAll("current5", "🟢")
+            .replaceAll("current6", "🟤")
+            .replaceAll("current", "⚪")
+        );
+        console.log(this.nextUp());
+
+        await this.sleep(400);
+        console.clear();
+
+        board[row] = oldPart;
+
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(board.map(p => p.join("")).join("\n")
+            .replaceAll("empty", "⚫")
+
+            .replaceAll("placed1", "🔴")
+            .replaceAll("placed2", "🟣")
+            .replaceAll("placed3", "🟠")
+            .replaceAll("placed4", "🟡")
+            .replaceAll("placed5", "🟢")
+            .replaceAll("placed6", "🟤")
+            .replaceAll("placed", "⚪")
+            .replaceAll("current1", "🔴")
+            .replaceAll("current2", "🟣")
+            .replaceAll("current3", "🟠")
+            .replaceAll("current4", "🟡")
+            .replaceAll("current5", "🟢")
+            .replaceAll("current6", "🟤")
+            .replaceAll("current", "⚪")
+        );
+        console.log(this.nextUp());
+
+        console.clear();
+
+        this.#interval = setInterval(() => {
+            this.render();
+        }, 100);
+
+    }
+
+    private sleep(ms: number) {
+        return new Promise((r) => setTimeout(r, ms));
+    }
+
     private move(dirrection: "right" | "left" | "down") {
-        if (dirrection === "right") this.#currentPosX++;
-        else if (dirrection === "left") this.#currentPosX--;
-        else this.#currentPosY++;
+        if (dirrection === "right" 
+        && (this.#currentPiece.xLength[this.#currentPiece.current] + this.#currentPosX) < this.#board[0].length) this.#currentPosX++;
+
+        else if (dirrection === "left" 
+        && (this.#currentPosX > 0)) this.#currentPosX--;
+        else if (dirrection === "down") this.#currentPosY++;
     }   
 
     private render() {
@@ -201,7 +316,7 @@ export default class Tetris {
             .replaceAll("current5", "🟢")
             .replaceAll("current6", "🟤")
             .replaceAll("current", "⚪")
-            );
+        );
         console.log(this.nextUp());
 
         return boardClone;
@@ -227,7 +342,7 @@ export default class Tetris {
         .replaceAll("current", "⚪") : "Please Wait"}`
     }
 
-    private place() {
+    private async place() {
 
         this.#bag.shift();
         const currentPiece = this.#currentPiece;
@@ -252,7 +367,8 @@ export default class Tetris {
                     break;
                 } 
                 
-                if (this.checkAbove(clone(this.#board), i - pieceYLength + extraY, xPos, j)) {                    clipped = true;
+                if (this.checkAbove(clone(this.#board), i - pieceYLength + extraY, xPos, j)) {                    
+                    clipped = true;
                     i--;
                     xPos = x;
                     extraY = 0;
@@ -286,7 +402,7 @@ export default class Tetris {
             this.#currentPiece = this.#bag[0];
         } else this.#currentPiece = this.#bag[0];
         
-        this.#board = this.score();
+        this.#board = await this.score();
 
     }
 
