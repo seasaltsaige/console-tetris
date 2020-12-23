@@ -373,7 +373,7 @@ export default class Tetris {
                     break;
                 } 
                 
-                if (this.checkAbove(clone(this.#board), i - pieceYLength + extraY, xPos, j)) {                    
+                if (this.checkAbove(clone(this.#board), i - pieceYLength + extraY, xPos, j, this.#currentPosY)) {                    
                     clipped = true;
                     i--;
                     xPos = x;
@@ -470,10 +470,10 @@ export default class Tetris {
         await this.sleep(500);
     }
 
-    private checkAbove(board: string[][], yPos: number, xPos: number, pieceNum: number) {
+    private checkAbove(board: string[][], yPos: number, xPos: number, pieceNum: number, currentYPos: number) {
         let placedAbove = false;
         for (let i = yPos; i > 0; i--) {
-            if (board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
+            if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
                 placedAbove = true;
                 break;
             }
