@@ -45,7 +45,8 @@ export default class Tetris {
         keypress(stdin);
 
         stdin.on('keypress', (__, key) => {
-            if (key && key.ctrl && key.name === "c") process.exit();                if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
+            if (key && key.ctrl && key.name === "c") process.exit();                
+            if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
             if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
             if (key && key.name === "d" && this.#interval !== false) this.move("right");
             if (key && key.name === "s" && this.#interval !== false) this.move("down");
