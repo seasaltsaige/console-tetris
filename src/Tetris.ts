@@ -76,7 +76,8 @@ export default class Tetris {
 
         if (rowIndexsToClear.length > 0) {
             rowIndexsToClear.forEach(async (index, i) => {
-                await this.clearAnimation(clonedBoard, index, i === 0 ? true : false);
+                clonedBoard[index] = ["🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴"];
+                await this.clearAnimation(clonedBoard, index, i === 0 ? true : false, "⚪");
                 clonedBoard.splice(index, 1);
                 clonedBoard.unshift(["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"])
             });
@@ -92,22 +93,22 @@ export default class Tetris {
 
     }
 
-    private async clearAnimation(board: string[][], row: number, modifyInterval: boolean) {
+    private async clearAnimation(board: string[][], row: number, modifyInterval: boolean, color: string) {
 
         if (this.#interval !== false && modifyInterval) {
             clearInterval(<NodeJS.Timeout>this.#interval);
             this.#interval = false;
         }
 
-        board[row][4] = "⚪";
-        board[row][5] = "⚪";
+        board[row][4] = color;
+        board[row][5] = color;
         console.clear();
 
         console.log(`Your current score is: ${this.#score}`);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(100);
+        await this.sleep(200);
         console.clear();
 
         board[row][4] = "empty";
@@ -117,17 +118,17 @@ export default class Tetris {
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(200);
+        await this.sleep(300);
         console.clear();
 
-        board[row][3] = "⚪";
-        board[row][6] = "⚪";
+        board[row][3] = color;
+        board[row][6] = color;
 
         console.log(`Your current score is: ${this.#score}`);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(100);
+        await this.sleep(200);
         console.clear();
 
         board[row][3] = "empty";
@@ -137,17 +138,17 @@ export default class Tetris {
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(200);
+        await this.sleep(300);
         console.clear();
 
-        board[row][2] = "⚪";
-        board[row][7] = "⚪";
+        board[row][2] = color;
+        board[row][7] = color;
 
         console.log(`Your current score is: ${this.#score}`);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
         
-        await this.sleep(100);
+        await this.sleep(200);
         console.clear();
 
         board[row][2] = "empty";
@@ -157,17 +158,17 @@ export default class Tetris {
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(200);
+        await this.sleep(300);
         console.clear();
 
-        board[row][1] = "⚪";
-        board[row][8] = "⚪";
+        board[row][1] = color;
+        board[row][8] = color;
 
         console.log(`Your current score is: ${this.#score}`);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(100);
+        await this.sleep(200);
         console.clear();
 
         board[row][1] = "empty";
@@ -177,17 +178,17 @@ export default class Tetris {
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(200);
+        await this.sleep(300);
         console.clear();
 
-        board[row][0] = "⚪";
-        board[row][9] = "⚪";
+        board[row][0] = color;
+        board[row][9] = color;
 
         console.log(`Your current score is: ${this.#score}`);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(100);
+        await this.sleep(200);
         console.clear();
 
         board[row][0] = "empty";
@@ -318,14 +319,14 @@ export default class Tetris {
             .replaceAll("placed4", "🟡")
             .replaceAll("placed5", "🟢")
             .replaceAll("placed6", "🟤")
-            .replaceAll("placed", "⚪")
+            .replaceAll("placed", "🔵")
             .replaceAll("current1", "🔴")
             .replaceAll("current2", "🟣")
             .replaceAll("current3", "🟠")
             .replaceAll("current4", "🟡")
             .replaceAll("current5", "🟢")
             .replaceAll("current6", "🟤")
-            .replaceAll("current", "⚪");
+            .replaceAll("current", "🔵");
     }
 
     private nextUp() {
@@ -335,7 +336,7 @@ export default class Tetris {
         .replaceAll("current4", "🟡")
         .replaceAll("current5", "🟢")
         .replaceAll("current6", "🟤")
-        .replaceAll("current", "⚪") : "Please Wait"}`
+        .replaceAll("current", "🔵") : "Please Wait"}`
     }
 
     private async place() {
