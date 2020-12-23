@@ -14,4 +14,5 @@ $ npm run
 To move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys.
 
 And that should basically be it! Enjoy your classic game of Tetris!
+![Image](https://cdn.discordapp.com/attachments/789254471887618089/791429105484431360/unknown.png)
 - Made with love from Maxisthemoose
