@@ -14,7 +14,7 @@
     "tty": "^1.0.1"
   },
   "scripts": {
-    "run": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts"
   },
   "author": "",
   "license": "ISC",

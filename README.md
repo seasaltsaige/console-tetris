@@ -7,7 +7,7 @@ Yeah of course! Just follow the steps for installing it on your own computer!
 ```cmd
 $ git clone https://github.com/Maxisthemoose/console-tetris.git
 $ npm install
-$ npm run
+$ npm start
 ```
 
 ## What are the controls?
