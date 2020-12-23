@@ -76,8 +76,8 @@ export default class Tetris {
 
         if (rowIndexsToClear.length > 0) {
             rowIndexsToClear.forEach(async (index, i) => {
-                clonedBoard[index] = ["🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴", "🔴"];
-                await this.clearAnimation(clonedBoard, index, i === 0 ? true : false, "⚪");
+                clonedBoard[index] = ["🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥"];
+                await this.clearAnimation(clonedBoard, index, i === 0 ? true : false, "🔲");
                 clonedBoard.splice(index, 1);
                 clonedBoard.unshift(["empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty"])
             });
@@ -311,32 +311,34 @@ export default class Tetris {
 
     private showBoard(board: string[][]) {
         return board.map(p => p.join("")).join("\n")
-            .replaceAll("empty", "⚫")
+            .replaceAll("empty", "🔳")
 
-            .replaceAll("placed1", "🔴")
-            .replaceAll("placed2", "🟣")
-            .replaceAll("placed3", "🟠")
-            .replaceAll("placed4", "🟡")
-            .replaceAll("placed5", "🟢")
-            .replaceAll("placed6", "🟤")
-            .replaceAll("placed", "🔵")
-            .replaceAll("current1", "🔴")
-            .replaceAll("current2", "🟣")
-            .replaceAll("current3", "🟠")
-            .replaceAll("current4", "🟡")
-            .replaceAll("current5", "🟢")
-            .replaceAll("current6", "🟤")
-            .replaceAll("current", "🔵");
+            .replaceAll("placed1", "🟥")
+            .replaceAll("placed2", "🟪")
+            .replaceAll("placed3", "🟧")
+            .replaceAll("placed4", "🟨")
+            .replaceAll("placed5", "🟩")
+            .replaceAll("placed6", "🟫")
+            .replaceAll("placed", "🟦")
+
+            .replaceAll("current1", "🟥")
+            .replaceAll("current2", "🟪")
+            .replaceAll("current3", "🟧")
+            .replaceAll("current4", "🟨")
+            .replaceAll("current5", "🟩")
+            .replaceAll("current6", "🟫")
+            .replaceAll("current", "🟦");
     }
 
     private nextUp() {
-        return `Next Up:\n${this.#bag[1] ? this.#bag[1][0].join("").replaceAll("current1", "🔴")
-        .replaceAll("current2", "🟣")
-        .replaceAll("current3", "🟠")
-        .replaceAll("current4", "🟡")
-        .replaceAll("current5", "🟢")
-        .replaceAll("current6", "🟤")
-        .replaceAll("current", "🔵") : "Please Wait"}`
+        return `Next Up:\n${this.#bag[1] ? this.#bag[1][0].join("")
+        .replaceAll("current1", "🟥")
+        .replaceAll("current2", "🟪")
+        .replaceAll("current3", "🟧")
+        .replaceAll("current4", "🟨")
+        .replaceAll("current5", "🟩")
+        .replaceAll("current6", "🟫")
+        .replaceAll("current", "🟦") : "Please Wait"}`
     }
 
     private async place() {
@@ -353,7 +355,14 @@ export default class Tetris {
         const draw = () => {
             
             let clipped = false;
+            let lost = false;
             for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+
+                if ((i - pieceYLength + extraY) < 0) {
+                    lost = true;
+                    break;
+                }
+
                 if (boardClone[i - pieceYLength + extraY][xPos] && boardClone[i - pieceYLength + extraY][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][j] !== "  " && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
                     clipped = true;
                     i--;
@@ -387,6 +396,7 @@ export default class Tetris {
             }
 
             if (clipped) return draw();
+            // else if (lost) this.lose();
             else this.#board = boardClone;
         } 
         draw();
@@ -422,6 +432,11 @@ export default class Tetris {
             if (piece.current === 0) piece.current = 3;
             else piece.current--;
         }
+
+        if (piece.xLength[piece.current] + this.#currentPosX > this.#board[0].length - 1) {
+            const amountToMove = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
+            this.#currentPosX -= amountToMove;
+        } 
 
         // console.log(piece[piece.current].join("") + "\n\n");
 
