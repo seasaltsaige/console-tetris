@@ -212,12 +212,48 @@ export default class Tetris {
     }
 
     private move(dirrection: "right" | "left" | "down") {
+
+        const boardClone = clone(this.#board);
+
         if (dirrection === "right" 
         && (this.#currentPiece.xLength[this.#currentPiece.current] + this.#currentPosX) < this.#board[0].length) this.#currentPosX++;
 
         else if (dirrection === "left" 
-        && (this.#currentPosX > 0)) this.#currentPosX--;
+        && (this.#currentPosX > 0)) {
+            this.#currentPosX--;
+        }
         else if (dirrection === "down") this.#currentPosY++;
+
+
+        let additionalY = 0;
+        let x = this.#currentPosX;
+        
+        let overlap = false;
+
+        for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+
+            if (boardClone[this.#currentPosY + additionalY] 
+                && boardClone[this.#currentPosY + additionalY][x] 
+                && boardClone[this.#currentPosY + additionalY][x].includes("placed") 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+
+                overlap = true;
+                break;
+            }
+
+            if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
+                additionalY++;
+                x = this.#currentPosX;
+            } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") x++;
+            else x++;
+        }
+
+        if (overlap) {
+            if (dirrection === "right") this.#currentPosX--;
+            else if (dirrection === "left") this.#currentPosX++;
+        }
+
     }   
 
     private render() {
@@ -482,6 +518,8 @@ export default class Tetris {
     }
 
     private rotate(piece: Bag, dirrection: "l" | "r"): Bag {
+        const boardClone = clone(this.#board);
+
         if (dirrection === "r") {
             if (piece.current === 3) piece.current = 0;
             else piece.current++;
@@ -494,6 +532,44 @@ export default class Tetris {
             const amountToMove = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
             this.#currentPosX -= amountToMove;
         }
+
+
+
+
+        let additionalY = 0;
+        let x = this.#currentPosX;
+        
+        let overlap = false;
+
+        for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+
+            if (boardClone[this.#currentPosY + additionalY] 
+                && boardClone[this.#currentPosY + additionalY][x] 
+                && boardClone[this.#currentPosY + additionalY][x].includes("placed") 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+
+                overlap = true;
+                break;
+            }
+
+            if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
+                additionalY++;
+                x = this.#currentPosX;
+            } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") x++;
+            else x++;
+        }
+
+        if (overlap) {
+            if (dirrection === "r") {
+                if (piece.current === 0) piece.current = 3; 
+                else piece.current--;
+            } else if (dirrection === "l") {
+                if (piece.current === 3) piece.current = 0;
+                else piece.current++;
+            }
+        }
+
 
         return piece;
     }
@@ -510,5 +586,3 @@ export default class Tetris {
     }
 
 }
-
-
