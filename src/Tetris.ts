@@ -2,11 +2,21 @@ import { stdin, stdout } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
+import play from "play-sound";
+
+const player = "./src/Utils/mplayer/mplayer.exe";
 
 export default class Tetris {
 
     #tetris: Bag[] = tetris;
     #currentPiece: Bag;
+
+    #themePlayer = play({ player });
+
+    #theme: any;
+    #move: any;
+    #clear: any;
+    #place: any;
 
     #bag: Bag[];
     #secondBag: Bag[];
@@ -30,6 +40,10 @@ export default class Tetris {
         console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n\nThe game will start in about 10 seconds.`)
 
         await this.sleep(15000);
+
+        this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
+            if (err) throw (err);
+        });
 
         const keypress = require("keypress");
 
@@ -87,6 +101,11 @@ export default class Tetris {
         }
 
         if (rowIndexsToClear.length > 0) {
+
+            this.#themePlayer.play("./src/Utils/audio/Clear.mp3", (err) => {
+                if (err) throw err;
+            });
+
             rowIndexsToClear.forEach(async (index, i) => {
                 clonedBoard[index] = ["🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥"];
                 await this.clearAnimation(clonedBoard, index, i === 0 ? true : false, "🔲");
@@ -123,7 +142,7 @@ export default class Tetris {
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(200);
+        await this.sleep(75);
         console.clear();
 
         board[row][first] = "empty";
@@ -134,7 +153,7 @@ export default class Tetris {
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(300);
+        await this.sleep(175);
 
     }
 
@@ -203,8 +222,7 @@ export default class Tetris {
         if (overlap) {
             if (dirrection === "right") this.#currentPosX--;
             else if (dirrection === "left") this.#currentPosX++;
-        }
-
+        } 
     }   
 
     private render() {
@@ -239,6 +257,7 @@ export default class Tetris {
         }
 
         let placed = false;
+        let clipped = false;
         let newClone = clone(this.#board);
 
         let additionalY = 0;
@@ -247,6 +266,17 @@ export default class Tetris {
         if (this.#currentPosY + pieceYLength === 20) return this.place();
 
         for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
+
+            if (this.#gameCounter % moduloCheck === 0
+                && newClone[this.#currentPosY + additionalY] 
+                && newClone[this.#currentPosY + additionalY][x] 
+                && newClone[this.#currentPosY + additionalY][x].includes("placed") 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+
+                clipped = true;
+                break;
+            }
 
             if (this.#gameCounter % moduloCheck === 0
                 && newClone[this.#currentPosY + additionalY + 1] 
@@ -273,6 +303,7 @@ export default class Tetris {
         }
 
         if (placed) return this.place();
+        if (clipped) return this.lose();
 
         this.#board = boardClone;
 
@@ -302,7 +333,7 @@ export default class Tetris {
 
     private showBoard(board: string[][]) {
         return board.map(p => p.join("")).join("\n")
-            .replaceAll("empty", "🔳")
+            .replaceAll("empty", "⚫")
 
             .replaceAll("placed1", "🟥")
             .replaceAll("placed2", "🟪")
@@ -416,6 +447,11 @@ export default class Tetris {
     }
 
     private async lose() {
+
+        this.#theme.kill();
+
+        this.#themePlayer.play("./src/Utils/audio/End.mp3");
+
         clearInterval(<NodeJS.Timeout>this.#interval);
 
         console.clear();
