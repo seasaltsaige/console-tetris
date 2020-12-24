@@ -13,6 +13,9 @@ $ npm start
 ## What are the controls?
 To move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys.
 
+#### Updates
+- Added Music! When the game starts, you should now be able to hear the original Tetris Theme! And when the game ends, you should now be able to hear the original Tetris Game Over Theme! I have also added the clear sound affect!
+
 And that should basically be it! Enjoy your classic game of Tetris!
 ![Image](https://cdn.discordapp.com/attachments/789254471887618089/791429105484431360/unknown.png)
 - Made with love from Maxisthemoose
