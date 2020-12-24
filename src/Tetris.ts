@@ -2,8 +2,11 @@ import { stdin, stdout } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
+import mp3Duration from "mp3-duration";
+import { promisify } from "util";
 import play from "play-sound";
 
+const getDuration = promisify(mp3Duration);
 const player = "./src/Utils/mplayer/mplayer.exe";
 
 export default class Tetris {
@@ -14,9 +17,6 @@ export default class Tetris {
     #themePlayer = play({ player });
 
     #theme: any;
-    #move: any;
-    #clear: any;
-    #place: any;
 
     #bag: Bag[];
     #secondBag: Bag[];
@@ -72,7 +72,7 @@ export default class Tetris {
         stdin.resume();
     }
 
-    private async score() {
+    private score() {
 
         let clearedRows = 0;
         const clonedBoard = clone(this.#board);
@@ -84,15 +84,12 @@ export default class Tetris {
             let clear = true;
 
             for (let j = 0; j < clonedBoard[0].length; j++) {
-
                 const boardPart = clonedBoard[i][j];
                 if (!boardPart.includes("placed")) {
                     clear = false;
                     break;
                 }
-
             }
-
             if (clear) {
                 rowIndexsToClear.push(i);
                 clearedRows++;
@@ -101,10 +98,6 @@ export default class Tetris {
         }
 
         if (rowIndexsToClear.length > 0) {
-
-            this.#themePlayer.play("./src/Utils/audio/Clear.mp3", (err) => {
-                if (err) throw err;
-            });
 
             rowIndexsToClear.forEach(async (index, i) => {
                 clonedBoard[index] = ["🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥", "🟥"];
@@ -120,6 +113,16 @@ export default class Tetris {
         else if (clearedRows === 4) this.#score += 1200;
 
         this.#clearedRows += clearedRows;
+
+        if (clearedRows === 4) {
+            this.#themePlayer.play("./src/Utils/audio/TetrisClear.mp3", (err) => {
+                if (err) throw err;
+            });
+        } else if (clearedRows > 0) {
+            this.#themePlayer.play("./src/Utils/audio/Clear.mp3", (err) => {
+                if (err) throw err;
+            });
+        }
 
         if (this.#clearedRows >= this.#maxRows) {
             this.#clearedRows -= 10;
@@ -222,14 +225,25 @@ export default class Tetris {
         if (overlap) {
             if (dirrection === "right") this.#currentPosX--;
             else if (dirrection === "left") this.#currentPosX++;
-        } 
+        } else {
+            if (dirrection !== "down") {
+                const audio = this.#themePlayer.play("./src/Utils/audio/Move.mp3", (err) => {
+                    if (err) throw err;
+                });
+                getDuration("./src/Utils/audio/Move.mp3").then(d => {
+                    this.sleep(d * 1500).then(() => {
+                        audio.kill();
+                    });
+                });
+            }
+        }
     }   
 
     private render() {
 
         const boardClone = clone(this.#board);
 
-        const moduloCheck = this.#level === 1 ? 10 : this.#level === 2 ? 9 : this.#level === 3 ? 8 : this.#level === 4 ? 7 : this.#level === 5 ? 6 : 5;
+        const moduloCheck = this.#level === 1 ? 10 : this.#level === 2 ? 9 : this.#level === 3 ? 8 : this.#level === 4 ? 7 : this.#level === 5 ? 6 : this.#level === 6 ? 5 : this.#level === 7 ? 4 : 3;
 
         for (let j = 0; j < boardClone.length; j++) {
             for (let i = 0; i < boardClone[0].length; i++) {
@@ -436,13 +450,23 @@ export default class Tetris {
         this.#currentPosX = 4;
         this.#currentPosY = 0;
 
+        const audio = this.#themePlayer.play("./src/Utils/audio/Place.mp3", (err) => {
+            if (err) throw err;
+        });
+
+        getDuration("./src/Utils/audio/Place.mp3").then(d => {
+            this.sleep(d * 1500).then(() => {
+                audio.kill();
+            });
+        });
+
         if (this.#bag.length === 0) {
             this.#bag = this.#secondBag;
             this.#secondBag = this.createBag();
             this.#currentPiece = this.#bag[0];
         } else this.#currentPiece = this.#bag[0];
         
-        this.#board = await this.score();
+        this.#board = this.score();
 
     }
 
@@ -544,9 +568,6 @@ export default class Tetris {
             this.#currentPosX -= amountToMove;
         }
 
-
-
-
         let additionalY = 0;
         let x = this.#currentPosX;
         
@@ -579,6 +600,15 @@ export default class Tetris {
                 if (piece.current === 3) piece.current = 0;
                 else piece.current++;
             }
+        } else {
+            const audio = this.#themePlayer.play("./src/Utils/audio/Rotate.mp3", (err) => {
+                if (err) throw err;
+            });
+            getDuration("./src/Utils/audio/Rotate.mp3").then(d => {
+                this.sleep(d * 1500).then(() => {
+                    audio.kill();
+                });
+            });
         }
 
 
