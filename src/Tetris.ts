@@ -32,7 +32,9 @@ export default class Tetris {
     #clearedRows = 0;
     #maxRows = 10;
 
-    constructor() { };
+    constructor() {
+        this.start();
+    };
 
     public async start(): Promise<void> {
 
