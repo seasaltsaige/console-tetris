@@ -4,6 +4,7 @@ import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
 import mp3Duration from "mp3-duration";
 import { promisify } from "util";
+import rs from "readline-sync";
 import play from "play-sound";
 
 const getDuration = promisify(mp3Duration);
@@ -39,39 +40,41 @@ export default class Tetris {
     public async start(): Promise<void> {
 
         console.clear();
-        console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n\nThe game will start in about 10 seconds.`)
+        console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n`)
 
-        await this.sleep(15000);
+        const ans = rs.question("Enter y to continue or any other key to cancel\n.");
 
-        this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
-            if (err) throw (err);
-        });
+        if (ans.toLowerCase() === "y") {
+            this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
+                if (err) throw (err);
+            });
 
-        const keypress = require("keypress");
+            const keypress = require("keypress");
 
-        this.#bag = this.createBag();
-        this.#secondBag = this.createBag();
+            this.#bag = this.createBag();
+            this.#secondBag = this.createBag();
 
-        this.#currentPiece = this.#bag[0];
-        this.#board = this.genBoard();
-        this.#interval = setInterval(() => {
-            this.render();
-        }, 100);
+            this.#currentPiece = this.#bag[0];
+            this.#board = this.genBoard();
+            this.#interval = setInterval(() => {
+                this.render();
+            }, 100);
 
-        keypress(stdin);
+            keypress(stdin);
 
-        stdin.on('keypress', (__, key) => {
-            if (key && key.ctrl && key.name === "c") process.exit();                
-            if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
-            if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
-            if (key && key.name === "d" && this.#interval !== false) this.move("right");
-            if (key && key.name === "s" && this.#interval !== false) this.move("down");
-            if (key && key.name === "a" && this.#interval !== false) this.move("left");
-            if (key && key.name === "down" && this.#interval !== false) this.place();
-        });
+            stdin.on('keypress', (__, key) => {
+                if (key && key.ctrl && key.name === "c") process.exit();                
+                if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
+                if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
+                if (key && key.name === "d" && this.#interval !== false) this.move("right");
+                if (key && key.name === "s" && this.#interval !== false) this.move("down");
+                if (key && key.name === "a" && this.#interval !== false) this.move("left");
+                if (key && key.name === "down" && this.#interval !== false) this.place();
+            });
 
-        stdin.setRawMode(true);
-        stdin.resume();
+            stdin.setRawMode(true);
+            stdin.resume();
+        } else return;
     }
 
     private score() {
