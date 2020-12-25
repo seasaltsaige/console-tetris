@@ -135,6 +135,9 @@ export default class Tetris {
         if (this.#clearedRows >= this.#maxRows) {
             this.#clearedRows -= 10;
             this.#level++;
+            this.#themePlayer.play("./Utils/audio/LevelUp.mp3", (err) => {
+                if (err) throw err;
+            });
         }
         
 
