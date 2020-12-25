@@ -19,6 +19,7 @@ To move the pieces left and right, use the A and D keys. To hard drop a piece, p
 #### Updates
 - Added Music! When the game starts, you should now be able to hear the original Tetris Theme! And when the game ends, you should now be able to hear the original Tetris Game Over Theme! I have also added the clear sound effect!
 - Added the rest of the SFX! Piece Move, Piece Rotate, Piece Drop/Place, Normal Clear, Tetris Clear, and also raised the volume of some clips.
+- Added Level Up sound effects! Score multiplier on level increase.
 
 And that should basically be it! Enjoy your classic game of Tetris!
 ![Image](https://cdn.discordapp.com/attachments/789254471887618089/791429105484431360/unknown.png)
