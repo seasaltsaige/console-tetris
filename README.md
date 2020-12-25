@@ -7,6 +7,7 @@ Yeah of course! Just follow the steps for installing it on your own computer!
 - I would highly recommend using either the [Windows Terminal](https://github.com/Maxisthemoose/console-tetris), as it supports the rendering of emojis in the window, or finding a terminal that will correctly render emojis. If you dont do so, you will be very underwhelmed with the results.
 ```cmd
 $ git clone https://github.com/Maxisthemoose/console-tetris.git
+$ cd console-tetris
 $ npm install
 $ npm start
 ```
