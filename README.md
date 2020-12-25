@@ -4,6 +4,7 @@ This repository is my attempt at reacreating the classic game Tetris. I tried to
 ## Can I play this?
 Yeah of course! Just follow the steps for installing it on your own computer!
 - Make sure you have [NodeJS](https://nodejs.org/en/) V15.4.0 or higher or you may encounter errors.
+- Make sure you have [Git](https://git-scm.com/) installed on your computer and it is properly set up in your PATH.
 - I would highly recommend using either the [Windows Terminal](https://github.com/Maxisthemoose/console-tetris), as it supports the rendering of emojis in the window, or finding a terminal that will correctly render emojis. If you dont do so, you will be very underwhelmed with the results.
 ```cmd
 $ git clone https://github.com/Maxisthemoose/console-tetris.git
