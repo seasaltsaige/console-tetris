@@ -4,6 +4,7 @@ This repository is my attempt at reacreating the classic game Tetris. I tried to
 ## Can I play this?
 Yeah of course! Just follow the steps for installing it on your own computer!
 - Make sure you have [NodeJS](https://nodejs.org/en/) V15.4.0 or higher or you may encounter errors.
+- I would highly recommend using either the [Windows Terminal](https://github.com/Maxisthemoose/console-tetris), as it supports the rendering of emojis in the window, or finding a terminal that will correctly render emojis. If you dont do so, you will be very underwhelmed with the results.
 ```cmd
 $ git clone https://github.com/Maxisthemoose/console-tetris.git
 $ npm install
@@ -15,6 +16,7 @@ To move the pieces left and right, use the A and D keys. To hard drop a piece, p
 
 #### Updates
 - Added Music! When the game starts, you should now be able to hear the original Tetris Theme! And when the game ends, you should now be able to hear the original Tetris Game Over Theme! I have also added the clear sound affect!
+- Added the rest of the SFX! Piece Move, Piece Rotate, Piece Drop/Place, Normal Clear, Tetris Clear, and also raised the volume of some clips.
 
 And that should basically be it! Enjoy your classic game of Tetris!
 ![Image](https://cdn.discordapp.com/attachments/789254471887618089/791429105484431360/unknown.png)
