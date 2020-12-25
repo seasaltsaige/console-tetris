@@ -6,6 +6,7 @@ import mp3Duration from "mp3-duration";
 import { promisify } from "util";
 import rs from "readline-sync";
 import play from "play-sound";
+import { readFileSync, writeFileSync } from "fs";
 
 const getDuration = promisify(mp3Duration);
 const player = "./src/Utils/mplayer/mplayer.exe";
@@ -31,6 +32,7 @@ export default class Tetris {
 
     #level = 1;
     #clearedRows = 0;
+    #totalClearedRows = 0;
     #maxRows = 10;
 
     constructor() {
@@ -42,7 +44,7 @@ export default class Tetris {
         console.clear();
         console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n`)
 
-        const ans = rs.question("Enter y to continue or any other key to cancel\n.");
+        const ans = rs.question("Enter y to continue or any other key to cancel.\n");
 
         if (ans.toLowerCase() === "y") {
             this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
@@ -112,12 +114,13 @@ export default class Tetris {
             });
         }
 
-        if (clearedRows === 1) this.#score += 40;
-        else if (clearedRows === 2) this.#score += 100;
-        else if (clearedRows === 3) this.#score += 300;
-        else if (clearedRows === 4) this.#score += 1200;
+        if (clearedRows === 1) this.#score += (40 * this.#level);
+        else if (clearedRows === 2) this.#score += (100 * this.#level);
+        else if (clearedRows === 3) this.#score += (300 * this.#level);
+        else if (clearedRows === 4) this.#score += (1200 * this.#level);
 
         this.#clearedRows += clearedRows;
+        this.#totalClearedRows += clearedRows;
 
         if (clearedRows === 4) {
             this.#themePlayer.play("./src/Utils/audio/TetrisClear.mp3", (err) => {
@@ -479,6 +482,9 @@ export default class Tetris {
 
         this.#theme.kill();
 
+        stdin.setRawMode(false);
+        stdin.end();
+
         this.#themePlayer.play("./src/Utils/audio/End.mp3");
 
         clearInterval(<NodeJS.Timeout>this.#interval);
@@ -498,6 +504,7 @@ export default class Tetris {
         await this.flash(whiteFlash, redFlash);
         await this.flash(whiteFlash, redFlash);
 
+        console.clear();
 
         console.log(`
         
@@ -506,21 +513,31 @@ export default class Tetris {
 ██║░░██╗░███████║██╔████╔██║█████╗░░  ██║░░██║╚██╗░██╔╝█████╗░░██████╔╝
 ██║░░╚██╗██╔══██║██║╚██╔╝██║██╔══╝░░  ██║░░██║░╚████╔╝░██╔══╝░░██╔══██╗
 ╚██████╔╝██║░░██║██║░╚═╝░██║███████╗  ╚█████╔╝░░╚██╔╝░░███████╗██║░░██║
-░╚═════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝  ░╚════╝░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝`);
+░╚═════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝  ░╚════╝░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝\n\n`);
 
+        console.log(`Current High Scores:\n\n`);
 
-        const bigFontScore = this.#score.toString();
-        console.log(`
-        █▄█ █▀█ █░█   █▀ █▀▀ █▀█ █▀█ █▀▀ █▀▄ ${bigFontScore.replaceAll(/\d/g, " ")}  █▀█ █▀█ █ █▄░█ ▀█▀ █▀
-        ░█░ █▄█ █▄█   ▄█ █▄▄ █▄█ █▀▄ ██▄ █▄▀ ${bigFontScore}  █▀▀ █▄█ █ █░▀█ ░█░ ▄█`);
+        const scores: { score: Array<{ name: string, score: number, rows: number, level: number }> } = require("./scores.json");
 
-        console.log(`
-        ┏━┳━┓╋╋╋┏┓╋╋┏┓╋╋╋┏━┳━┓╋╋╋╋┏┳━┳┓┏┓╋╋╋╋╋╋╋╋╋┏━┓
-        ┃┃┃┃┣━┓┏┛┣━┓┃┗┳┳┓┃┃┃┃┣━┓┏┳╋┫━┫┗┫┗┳━┳━━┳━┳━┫━╋━┓
-        ┃┃┃┃┃╋┗┫╋┃┻┫┃╋┃┃┃┃┃┃┃┃╋┗╋┃┫┣━┃┏┫┃┃┻┫┃┃┃╋┃╋┣━┃┻┫
-        ┗┻━┻┻━━┻━┻━┛┗━╋┓┃┗┻━┻┻━━┻┻┻┻━┻━┻┻┻━┻┻┻┻━┻━┻━┻━┛
-        ╋╋╋╋╋╋╋╋╋╋╋╋╋╋┗━┛`);
+        const displayScores = scores.score.sort((a, b) => b.level - a.level).map((s, i) => `#${i + 1} - ${s.name} scored ${s.score}!\nClearing ${s.rows} rows\nThey got to level ${s.level}`);
 
+        if (displayScores.length < 1) console.log("No highscores to display.");
+        else console.log(displayScores.join("\n\n"));
+
+        console.log(`\n\nYou scored ${this.#score} points and got to level ${this.#level}! Clearing a total of ${this.#totalClearedRows} rows!`);
+
+        const name = rs.question("Please enter your name to be displayed on the high score section! ");
+
+        scores.score.push({
+            level: this.#level,
+            name, 
+            rows: this.#totalClearedRows,
+            score: this.#score,
+        });
+
+        writeFileSync("./src/scores.json", JSON.stringify(scores, null, 4));
+
+        return console.log("Thank you for playing!\n  -Maxisthemoose");
 
     }
 
@@ -589,6 +606,8 @@ export default class Tetris {
                 overlap = true;
                 break;
             }
+
+            if (this.#currentPosY + additionalY > this.#board.length - 1) overlap = true;
 
             if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
                 additionalY++;
