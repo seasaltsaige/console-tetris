@@ -1,4 +1,4 @@
-import { stdin, stdout } from "process";
+import { stdin } from "process";
 import { Bag } from "./Utils/bag.interface";
 import { Tetris as tetris } from "./Utils/bag";
 import { clone } from "ramda";
@@ -6,7 +6,7 @@ import mp3Duration from "mp3-duration";
 import { promisify } from "util";
 import rs from "readline-sync";
 import play from "play-sound";
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 
 const getDuration = promisify(mp3Duration);
 const player = "./src/Utils/mplayer/mplayer.exe";
@@ -35,6 +35,8 @@ export default class Tetris {
     #totalClearedRows = 0;
     #maxRows = 10;
 
+    #renderSpeed = 50;
+
     constructor() {
         this.start();
     };
@@ -44,39 +46,41 @@ export default class Tetris {
         console.clear();
         console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n`)
 
-        const ans = rs.question("Enter y to continue or any other key to cancel.\n");
+        const ans = rs.keyInSelect(["Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 6", "Level 7", "Level 8", "Level 9", "Level 10"], "Which level would you like to start on?");
 
-        if (ans.toLowerCase() === "y") {
-            this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
-                if (err) throw (err);
-            });
+        this.#level = ans + 1;
 
-            const keypress = require("keypress");
+        if (ans === -1) return console.log("\nSee you next time!");
 
-            this.#bag = this.createBag();
-            this.#secondBag = this.createBag();
+        this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
+            if (err) throw (err);
+        });
 
-            this.#currentPiece = this.#bag[0];
-            this.#board = this.genBoard();
-            this.#interval = setInterval(() => {
-                this.render();
-            }, 100);
+        const keypress = require("keypress");
 
-            keypress(stdin);
+        this.#bag = this.createBag();
+        this.#secondBag = this.createBag();
 
-            stdin.on('keypress', (__, key) => {
-                if (key && key.ctrl && key.name === "c") process.exit();                
-                if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
-                if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
-                if (key && key.name === "d" && this.#interval !== false) this.move("right");
-                if (key && key.name === "s" && this.#interval !== false) this.move("down");
-                if (key && key.name === "a" && this.#interval !== false) this.move("left");
-                if (key && key.name === "down" && this.#interval !== false) this.place();
-            });
+        this.#currentPiece = this.#bag[0];
+        this.#board = this.genBoard();
+        this.#interval = setInterval(() => {
+            this.render();
+        }, this.#renderSpeed);
 
-            stdin.setRawMode(true);
-            stdin.resume();
-        } else return;
+        keypress(stdin);
+
+        stdin.on('keypress', (__, key) => {                
+            if (key && key.ctrl && key.name === "c") process.exit();                
+            if (key && key.name === "right" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "r");
+            if (key && key.name === "left" && this.#interval !== false) this.#currentPiece = this.rotate(this.#currentPiece, "l");
+            if (key && key.name === "d" && this.#interval !== false) this.move("right");
+            if (key && key.name === "s" && this.#interval !== false) this.move("down");
+            if (key && key.name === "a" && this.#interval !== false) this.move("left");
+            if (key && key.name === "down" && this.#interval !== false) this.place();
+        });
+
+        stdin.setRawMode(true);
+        stdin.resume();
     }
 
     private score() {
@@ -135,12 +139,10 @@ export default class Tetris {
         if (this.#clearedRows >= this.#maxRows) {
             this.#clearedRows -= 10;
             this.#level++;
-            this.#themePlayer.play("./Utils/audio/LevelUp.mp3", (err) => {
+            this.#themePlayer.play("./src/Utils/audio/LevelUp.mp3", (err) => {
                 if (err) throw err;
             });
         }
-        
-
         return clonedBoard;
 
     }
@@ -152,22 +154,22 @@ export default class Tetris {
         console.clear();
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(75);
+        await this.sleep(50);
         console.clear();
 
         board[row][first] = "empty";
         board[row][second] = "empty";
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
         console.log(this.showBoard(board));
         console.log(this.nextUp());
 
-        await this.sleep(175);
+        await this.sleep(75);
 
     }
 
@@ -187,7 +189,7 @@ export default class Tetris {
         if (modifyInterval) {
             this.#interval = setInterval(() => {
                 this.render();
-            }, 100);
+            }, this.#renderSpeed);
         }
     }
 
@@ -254,7 +256,22 @@ export default class Tetris {
 
         const boardClone = clone(this.#board);
 
-        const moduloCheck = this.#level === 1 ? 10 : this.#level === 2 ? 9 : this.#level === 3 ? 8 : this.#level === 4 ? 7 : this.#level === 5 ? 6 : this.#level === 6 ? 5 : this.#level === 7 ? 4 : 3;
+        const moduloCheck = this.#level === 1 ? 20 
+            : this.#level === 2 ? 19 
+            : this.#level === 3 ? 18 
+            : this.#level === 4 ? 17
+            : this.#level === 5 ? 16
+            : this.#level === 6 ? 15
+            : this.#level === 7 ? 14
+            : this.#level === 8 ? 13
+            : this.#level === 9 ? 12
+            : this.#level === 10 ? 11
+            : this.#level === 11 ? 10
+            : this.#level === 12 ? 9
+            : this.#level === 13 ? 7
+            : this.#level === 14 ? 4
+            : this.#level === 15 ? 2
+            : 1
 
         for (let j = 0; j < boardClone.length; j++) {
             for (let i = 0; i < boardClone[0].length; i++) {
@@ -339,7 +356,7 @@ export default class Tetris {
 
         console.clear();
         console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
         console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
@@ -549,7 +566,7 @@ export default class Tetris {
         this.#board = flashOne;
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
         console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
@@ -559,7 +576,7 @@ export default class Tetris {
         this.#board = flashTwo;
 
         console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows})`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
         console.log(this.showBoard(this.#board));
         console.log(this.nextUp());
 
@@ -568,10 +585,28 @@ export default class Tetris {
 
     private checkAbove(board: string[][], yPos: number, xPos: number, pieceNum: number, currentYPos: number) {
         let placedAbove = false;
-        for (let i = yPos; i > 0; i--) {
-            if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
-                placedAbove = true;
-                break;
+
+        if (this.#currentPiece[this.#currentPiece.current].join("") === ["  ", "current", "\n", "  ", "current", "\n", "current", "current"].join("")) {
+
+            const leftYPos = this.#currentPosY + 2;
+
+            if (pieceNum === 6) {
+                yPos = leftYPos - 1;
+            }
+
+            for (let i = yPos; i > 0; i--) {
+                if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
+                    placedAbove = true;
+                    break;
+                }
+            }
+
+        } else {
+            for (let i = yPos; i > 0; i--) {
+                if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
+                    placedAbove = true;
+                    break;
+                }
             }
         }
         return placedAbove;
