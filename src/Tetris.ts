@@ -265,10 +265,10 @@ export default class Tetris {
             : this.#level === 7 ? 14
             : this.#level === 8 ? 13
             : this.#level === 9 ? 12
-            : this.#level === 10 ? 11
-            : this.#level === 11 ? 10
-            : this.#level === 12 ? 9
-            : this.#level === 13 ? 7
+            : this.#level === 10 ? 10
+            : this.#level === 11 ? 8
+            : this.#level === 12 ? 7
+            : this.#level === 13 ? 6
             : this.#level === 14 ? 4
             : this.#level === 15 ? 2
             : 1
@@ -284,8 +284,6 @@ export default class Tetris {
                 boardClone[j][i] === "current6") boardClone[j][i] = "empty";
             }
         }
-
-        const pieceYLength = this.#currentPiece[this.#currentPiece.current].filter(p => p === "\n").length + 1;
 
         let largestOffset = 1;
 
@@ -305,7 +303,6 @@ export default class Tetris {
         let additionalY = 0;
         let x = this.#currentPosX;
 
-        if (this.#currentPosY + pieceYLength === 20) return this.place();
 
         for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
 
@@ -320,12 +317,14 @@ export default class Tetris {
                 break;
             }
 
-            if (this.#gameCounter % moduloCheck === 0
-                && newClone[this.#currentPosY + additionalY + 1] 
+            if ((this.#gameCounter % moduloCheck === 0) && 
+                
+                ((newClone[this.#currentPosY + additionalY + 1] 
                 && newClone[this.#currentPosY + additionalY + 1][x] 
                 && newClone[this.#currentPosY + additionalY + 1][x].includes("placed") 
                 && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
-                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n"
+                ) || !newClone[this.#currentPosY + additionalY + 1])) {
 
                 placed = true;
                 break;
