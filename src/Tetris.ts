@@ -41,7 +41,7 @@ export default class Tetris {
         this.start();
     };
 
-    public async start(): Promise<void> {
+    private async start(): Promise<void> {
 
         console.clear();
         console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n`)
