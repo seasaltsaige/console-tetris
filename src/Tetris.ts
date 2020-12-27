@@ -216,11 +216,12 @@ export default class Tetris {
 
         for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
 
-            if (boardClone[this.#currentPosY + additionalY] 
+            if ((boardClone[this.#currentPosY + additionalY] 
                 && boardClone[this.#currentPosY + additionalY][x] 
                 && boardClone[this.#currentPosY + additionalY][x].includes("placed") 
                 && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
-                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n")
+                || (!boardClone[this.#currentPosY + additionalY])) {
 
                 overlap = true;
                 break;
@@ -236,6 +237,7 @@ export default class Tetris {
         if (overlap) {
             if (dirrection === "right") this.#currentPosX--;
             else if (dirrection === "left") this.#currentPosX++;
+            else if (dirrection === "down") this.#currentPosY--;
         } else {
             if (dirrection !== "down") {
                 const audio = this.#themePlayer.play("./src/Utils/audio/Move.mp3", (err) => {
@@ -610,11 +612,6 @@ export default class Tetris {
             else piece.current--;
         }
 
-        if (piece.xLength[piece.current] + this.#currentPosX > this.#board[0].length - 1) {
-            const amountToMove = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
-            this.#currentPosX -= amountToMove;
-        }
-
         let additionalY = 0;
         let x = this.#currentPosX;
         
@@ -649,6 +646,7 @@ export default class Tetris {
                 if (piece.current === 3) piece.current = 0;
                 else piece.current++;
             }
+            // return piece;
         } else {
             const audio = this.#themePlayer.play("./src/Utils/audio/Rotate.mp3", (err) => {
                 if (err) throw err;
@@ -658,6 +656,59 @@ export default class Tetris {
                     audio.kill();
                 });
             });
+            // return piece;
+        }
+
+        // FIx this somehow lol its broken
+        
+        if (piece.xLength[piece.current] + this.#currentPosX > this.#board[0].length - 1) {
+            const amountToMove = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
+            // this.#currentPosX -= amountToMove;
+
+            const pieceYLength = piece[piece.current].filter(p => p === "\n").length + 1;
+
+            const testXPos = this.#currentPosX - amountToMove;
+
+            let extraY = 0;
+            let xPos = testXPos;
+
+            let clippedPos = false;
+
+            for (let i = 0; i < this.#currentPiece[this.#currentPiece.current].length; i++) {
+
+                if (boardClone[20 - pieceYLength + extraY][xPos].includes("placed")) {
+                    clippedPos = true;
+                    break;
+                }
+
+                if (this.#currentPiece[this.#currentPiece.current][i] === "\n") {
+                    extraY++;
+                    xPos = testXPos;
+                } else if (this.#currentPiece[this.#currentPiece.current][i] === "  ") xPos++;
+                else xPos++;
+            }
+
+            if (!clippedPos) {
+                this.#currentPosX -= amountToMove;
+                const audio = this.#themePlayer.play("./src/Utils/audio/Rotate.mp3", (err) => {
+                    if (err) throw err;
+                });
+                getDuration("./src/Utils/audio/Rotate.mp3").then(d => {
+                    this.sleep(d * 1500).then(() => {
+                        audio.kill();
+                    });
+                });
+                // return piece;
+            } else {
+                if (dirrection === "r") {
+                    if (piece.current === 0) piece.current = 3; 
+                    else piece.current--;
+                } else if (dirrection === "l") {
+                    if (piece.current === 3) piece.current = 0;
+                    else piece.current++;
+                }
+                return piece;
+            };
         }
 
 
