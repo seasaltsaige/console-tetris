@@ -614,8 +614,17 @@ export default class Tetris {
 
         let additionalY = 0;
         let x = this.#currentPosX;
-        
+        let xClone = this.#currentPosX;
+
         let overlap = false;
+        let moveClip = false;
+
+        let xToLeft = 0;
+
+        if (piece.xLength[piece.current] + this.#currentPosX > this.#board[0].length - 1) {
+            xToLeft = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
+            this.#currentPosX -= xToLeft;
+        }
 
         for (let j = 0; j < this.#currentPiece[this.#currentPiece.current].length; j++) {
 
@@ -629,14 +638,30 @@ export default class Tetris {
                 break;
             }
 
+            if (boardClone[this.#currentPosY + additionalY] 
+                && boardClone[this.#currentPosY + additionalY][x - xToLeft] 
+                && boardClone[this.#currentPosY + additionalY][x - xToLeft].includes("placed") 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "  " 
+                && this.#currentPiece[this.#currentPiece.current][j] !== "\n") {
+
+                moveClip = true;
+                overlap = true;
+                break;
+            }
+
             if (this.#currentPosY + additionalY > this.#board.length - 1) overlap = true;
 
             if (this.#currentPiece[this.#currentPiece.current][j] === "\n") {
                 additionalY++;
-                x = this.#currentPosX;
-            } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") x++;
-            else x++;
+                x = xClone;
+            } else if (this.#currentPiece[this.#currentPiece.current][j] === "  ") {
+                x++;
+            } else {
+                x++;
+            }
         }
+
+        if (moveClip) this.#currentPosX += xToLeft;
 
         if (overlap) {
             if (dirrection === "r") {
@@ -646,7 +671,6 @@ export default class Tetris {
                 if (piece.current === 3) piece.current = 0;
                 else piece.current++;
             }
-            // return piece;
         } else {
             const audio = this.#themePlayer.play("./src/Utils/audio/Rotate.mp3", (err) => {
                 if (err) throw err;
@@ -656,61 +680,7 @@ export default class Tetris {
                     audio.kill();
                 });
             });
-            // return piece;
         }
-
-        // FIx this somehow lol its broken
-        
-        if (piece.xLength[piece.current] + this.#currentPosX > this.#board[0].length - 1) {
-            const amountToMove = (piece.xLength[piece.current] + this.#currentPosX) - this.#board[0].length;
-            // this.#currentPosX -= amountToMove;
-
-            const pieceYLength = piece[piece.current].filter(p => p === "\n").length + 1;
-
-            const testXPos = this.#currentPosX - amountToMove;
-
-            let extraY = 0;
-            let xPos = testXPos;
-
-            let clippedPos = false;
-
-            for (let i = 0; i < this.#currentPiece[this.#currentPiece.current].length; i++) {
-
-                if (boardClone[20 - pieceYLength + extraY][xPos].includes("placed")) {
-                    clippedPos = true;
-                    break;
-                }
-
-                if (this.#currentPiece[this.#currentPiece.current][i] === "\n") {
-                    extraY++;
-                    xPos = testXPos;
-                } else if (this.#currentPiece[this.#currentPiece.current][i] === "  ") xPos++;
-                else xPos++;
-            }
-
-            if (!clippedPos) {
-                this.#currentPosX -= amountToMove;
-                const audio = this.#themePlayer.play("./src/Utils/audio/Rotate.mp3", (err) => {
-                    if (err) throw err;
-                });
-                getDuration("./src/Utils/audio/Rotate.mp3").then(d => {
-                    this.sleep(d * 1500).then(() => {
-                        audio.kill();
-                    });
-                });
-                // return piece;
-            } else {
-                if (dirrection === "r") {
-                    if (piece.current === 0) piece.current = 3; 
-                    else piece.current--;
-                } else if (dirrection === "l") {
-                    if (piece.current === 3) piece.current = 0;
-                    else piece.current++;
-                }
-                return piece;
-            };
-        }
-
 
         return piece;
     }
