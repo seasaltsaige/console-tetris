@@ -34,7 +34,7 @@ export default class Tetris {
     #gameCounter = 0;
     #score = 0;
 
-    #level = 1;
+    #level = 0;
     #clearedRows = 0;
     #totalClearedRows = 0;
     #maxRows = 10;
@@ -122,10 +122,10 @@ export default class Tetris {
             });
         }
 
-        if (clearedRows === 1) this.#score += (40 * this.#level);
-        else if (clearedRows === 2) this.#score += (100 * this.#level);
-        else if (clearedRows === 3) this.#score += (300 * this.#level);
-        else if (clearedRows === 4) this.#score += (1200 * this.#level);
+        if (clearedRows === 1) this.#score += (40 * (this.#level + 1));
+        else if (clearedRows === 2) this.#score += (100 * (this.#level + 1));
+        else if (clearedRows === 3) this.#score += (300 * (this.#level + 1));
+        else if (clearedRows === 4) this.#score += (1200 * (this.#level + 1));
 
         this.#clearedRows += clearedRows;
         this.#totalClearedRows += clearedRows;
