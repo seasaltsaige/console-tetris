@@ -20,6 +20,10 @@ export default class Tetris {
 
     #theme: any;
 
+
+    #pieceUsage = { j: 0, l: 0, o: 0, t: 0, z: 0, s: 0, i: 0 };
+    #lastPieceType: "j" | "l" | "o" | "t" | "z" | "s" | "i";
+
     #bag: Bag[];
     #secondBag: Bag[];
 
@@ -153,10 +157,7 @@ export default class Tetris {
         board[row][second] = color;
         console.clear();
 
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
+        this.showData(board);
 
         await this.sleep(50);
         console.clear();
@@ -164,10 +165,7 @@ export default class Tetris {
         board[row][first] = "empty";
         board[row][second] = "empty";
 
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
-        console.log(this.showBoard(board));
-        console.log(this.nextUp());
+        this.showData(board);
 
         await this.sleep(75);
 
@@ -253,6 +251,12 @@ export default class Tetris {
     }   
 
     private render() {
+
+        const pieceType = this.#bag.find(p => p[this.#currentPiece.current].join("") === this.#currentPiece[this.#currentPiece.current].join("")).type;
+        if (this.#lastPieceType !== pieceType)
+            this.#pieceUsage[pieceType]++;
+
+        this.#lastPieceType = pieceType;
 
         const boardClone = clone(this.#board);
 
@@ -354,10 +358,8 @@ export default class Tetris {
         } else this.#gameCounter++;
 
         console.clear();
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
-        console.log(this.showBoard(this.#board));
-        console.log(this.nextUp());
+        
+        this.showData(this.#board);
 
         return boardClone;
     }
@@ -564,20 +566,14 @@ export default class Tetris {
         console.clear();
         this.#board = flashOne;
 
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
-        console.log(this.showBoard(this.#board));
-        console.log(this.nextUp());
+        this.showData(this.#board);
 
         await this.sleep(500);
 
         console.clear();
         this.#board = flashTwo;
 
-        console.log(`Your current score is: ${this.#score}`);
-        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
-        console.log(this.showBoard(this.#board));
-        console.log(this.nextUp());
+        this.showData(this.#board);
 
         await this.sleep(500);
     }
@@ -586,28 +582,20 @@ export default class Tetris {
         let placedAbove = false;
 
         if (this.#currentPiece[this.#currentPiece.current].join("") === ["  ", "current", "\n", "  ", "current", "\n", "current", "current"].join("")) {
-
             const leftYPos = this.#currentPosY + 2;
+            if (pieceNum === 6) yPos = leftYPos - 1;
+        } else if (this.#currentPiece[this.#currentPiece.current].join("") === ["current2", "\n", "current2", "\n", "current2", "current2"].join("")) {
+            const rightYPos = this.#currentPosY + 2;
+            if (pieceNum === 5) yPos = rightYPos - 1;
+        }
 
-            if (pieceNum === 6) {
-                yPos = leftYPos - 1;
-            }
-
-            for (let i = yPos; i > 0; i--) {
-                if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
-                    placedAbove = true;
-                    break;
-                }
-            }
-
-        } else {
-            for (let i = yPos; i > 0; i--) {
-                if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
-                    placedAbove = true;
-                    break;
-                }
+        for (let i = yPos; i > 0; i--) {
+            if (i - 1 > currentYPos && board[i - 1][xPos] && board[i - 1][xPos].includes("placed") && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "  " && this.#currentPiece[this.#currentPiece.current][pieceNum] !== "\n") {
+                placedAbove = true;
+                break;
             }
         }
+        
         return placedAbove;
     }
 
@@ -676,9 +664,22 @@ export default class Tetris {
         return piece;
     }
 
+    private showData(board: string[][]) {
+        console.log(`Your current score is: ${this.#score}`);
+        console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
+        console.log(this.pieceUsage());
+        console.log(this.showBoard(board));
+        console.log(this.nextUp());
+    }
+
+    private pieceUsage() {
+        const pieceUsage = `Total J: ${this.#pieceUsage.j}   Total Z: ${this.#pieceUsage.z}   Total L: ${this.#pieceUsage.l}\nTotal S: ${this.#pieceUsage.s}   Total I: ${this.#pieceUsage.i}   Total O: ${this.#pieceUsage.o}   Total T: ${this.#pieceUsage.t}`
+        return pieceUsage;
+    }
+
     private createBag(): Bag[] {
         const bag: Bag[] = [];
-        const tetrisClone = [...this.#tetris];
+        const tetrisClone = clone(this.#tetris);
         for (let i = 0; i < 7; i++) {
             const tetrisIndex = Math.floor(Math.random() * tetrisClone.length);
             bag.push(tetrisClone[tetrisIndex]);

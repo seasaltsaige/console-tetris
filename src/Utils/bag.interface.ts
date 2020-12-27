@@ -5,4 +5,5 @@ export interface Bag {
     3: string[];
     xLength: number[];
     current: number;
+    type: "j" | "l" | "i" | "o" | "z" | "s" | "t";
 }
