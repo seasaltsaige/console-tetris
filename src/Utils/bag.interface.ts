@@ -6,4 +6,5 @@ export interface Bag {
     xLength: number[];
     current: number;
     type: "j" | "l" | "i" | "o" | "z" | "s" | "t";
+    held: boolean;
 }

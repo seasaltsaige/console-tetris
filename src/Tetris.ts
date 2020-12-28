@@ -20,6 +20,7 @@ export default class Tetris {
 
     #theme: any;
 
+    #gameType: "no-hold" | "hold";
 
     #pieceUsage = { j: 0, l: 0, o: 0, t: 0, z: 0, s: 0, i: 0 };
     #lastPieceType: "j" | "l" | "o" | "t" | "z" | "s" | "i";
@@ -41,6 +42,9 @@ export default class Tetris {
 
     #renderSpeed = 50;
 
+    #heldPiece: Bag;
+    #canSwitch: boolean = true;
+
     constructor() {
         this.start();
     };
@@ -48,13 +52,34 @@ export default class Tetris {
     private async start(): Promise<void> {
 
         console.clear();
-        console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Have fun!\n`)
+        console.log(`Welcome to Console Tetris, to move the pieces left and right, use the A and D keys. To hard drop a piece, press the down arrow. To move a piece down faster, use the S key. To rotate the pieces left and right, use the Left and Right arrow keys. Press the F key to place the current piece in the "Hold" position to use it at a later time. Have fun!\n`)
 
-        const ans = rs.keyInSelect(["Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 6", "Level 7", "Level 8", "Level 9", "Level 10"], "Which level would you like to start on?");
+        const ans = rs.keyInSelect(
+            [
+                "Level 0",
+                "Level 1", 
+                "Level 2", 
+                "Level 3", 
+                "Level 4", 
+                "Level 5", 
+                "Level 6", 
+                "Level 7", 
+                "Level 8", 
+                "Level 9",
+                "Level 10",
+            ], "Which level would you like to start on?");
 
-        this.#level = ans + 1;
+        this.#level = ans;
 
         if (ans === -1) return console.log("\nSee you next time!");
+
+        const question = () => {
+            const gameType = rs.question("What game type would you like to play in? [hold|no-hold]");
+            if (gameType === "hold") this.#gameType = "hold";
+            else if (gameType === "no-hold") this.#gameType = "no-hold";
+            else question();
+        };
+        question();
 
         this.#theme = this.#themePlayer.play("./src/Utils/audio/Tetris.mp3", { "./src/Utils/mplayer/mplayer.exe": ["-loop", 0] }, (err) => {
             if (err) throw (err);
@@ -81,11 +106,45 @@ export default class Tetris {
             if (key && key.name === "s" && this.#interval !== false) this.move("down");
             if (key && key.name === "a" && this.#interval !== false) this.move("left");
             if (key && key.name === "p") this.pause_resume();
+            if (key && key.name === "f" && this.#interval !== false  && this.#gameType === "hold") this.hold();
             if (key && key.name === "down" && this.#interval !== false) this.place();
         });
 
         stdin.setRawMode(true);
         stdin.resume();
+    }
+
+    private hold() {
+
+        if (this.#canSwitch) {
+            
+            this.#currentPosY = 0;
+            this.#currentPosX = 4;
+
+            if (this.#heldPiece) {
+
+                const currentPiece = this.#currentPiece;
+                this.#currentPiece = this.#heldPiece;
+                this.#heldPiece = currentPiece;
+                this.#heldPiece.held = true;
+                this.#currentPiece.held = true;
+                this.#canSwitch = false;
+
+            } else {
+
+                this.#heldPiece = this.#currentPiece;
+                this.#bag.shift();
+                if (this.#bag.length === 0) {
+                    this.#bag = this.#secondBag;
+                    this.#secondBag = this.createBag();
+                    this.#currentPiece = this.#bag[0];
+                } else this.#currentPiece = this.#bag[0];
+
+                this.#heldPiece.held = true;
+                this.#canSwitch = false;
+            }
+        }
+
     }
 
     private pause_resume() {
@@ -279,8 +338,10 @@ export default class Tetris {
 
     private render() {
 
-        const pieceType = this.#bag.find(p => p[this.#currentPiece.current].join("") === this.#currentPiece[this.#currentPiece.current].join("")).type;
-        if (this.#lastPieceType !== pieceType)
+        // console.log(this.#bag);
+        // console.log(this.#currentPiece);
+        const pieceType = this.#currentPiece.type;
+        if ((this.#lastPieceType !== pieceType) && !this.#currentPiece.held)
             this.#pieceUsage[pieceType]++;
 
         this.#lastPieceType = pieceType;
@@ -523,6 +584,7 @@ export default class Tetris {
         } else this.#currentPiece = this.#bag[0];
         
         this.#board = this.score();
+        this.#canSwitch = true;
 
     }
 
@@ -563,11 +625,11 @@ export default class Tetris {
 ╚██████╔╝██║░░██║██║░╚═╝░██║███████╗  ╚█████╔╝░░╚██╔╝░░███████╗██║░░██║
 ░╚═════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝  ░╚════╝░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝\n\n`);
 
-        console.log(`Current High Scores:\n\n`);
+        console.log(`Current High Scores for ${this.#gameType}:\n\n`);
 
-        const scores: { score: Array<{ name: string, score: number, rows: number, level: number }> } = require("./scores.json");
+        const scores: { score: Array<{ name: string, score: number, rows: number, level: number, type: string }> } = require("./scores.json");
 
-        const displayScores = scores.score.sort((a, b) => b.level - a.level).map((s, i) => `#${i + 1} - ${s.name} scored ${s.score}!\nClearing ${s.rows} rows\nThey got to level ${s.level}`);
+        const displayScores = scores.score.sort((a, b) => b.level - a.level).filter(s => s.type === this.#gameType).map((s, i) => `#${i + 1} - ${s.name} scored ${s.score}!\nClearing ${s.rows} rows\nThey got to level ${s.level}`);
 
         if (displayScores.length < 1) console.log("No highscores to display.");
         else console.log(displayScores.join("\n\n"));
@@ -581,6 +643,7 @@ export default class Tetris {
             name, 
             rows: this.#totalClearedRows,
             score: this.#score,
+            type: this.#gameType,
         });
 
         writeFileSync("./src/scores.json", JSON.stringify(scores, null, 4));
@@ -715,12 +778,24 @@ export default class Tetris {
         console.log(`Current level: ${this.#level} (${this.#clearedRows}/${this.#maxRows} Rows) ${this.#totalClearedRows} Total `);
         console.log(this.pieceUsage());
         console.log(this.showBoard(board));
+        if (this.#gameType === "hold") console.log(this.held());
         console.log(this.nextUp());
     }
 
     private pieceUsage() {
         const pieceUsage = `Total J: ${this.#pieceUsage.j}   Total Z: ${this.#pieceUsage.z}   Total L: ${this.#pieceUsage.l}\nTotal S: ${this.#pieceUsage.s}   Total I: ${this.#pieceUsage.i}   Total O: ${this.#pieceUsage.o}   Total T: ${this.#pieceUsage.t}`
         return pieceUsage;
+    }
+
+    private held() {
+        return "\nHeld Piece:\n" + (this.#heldPiece ? this.#heldPiece[0].join("")
+        .replaceAll("current1", "🟥")
+        .replaceAll("current2", "🟪")
+        .replaceAll("current3", "🟧")
+        .replaceAll("current4", "🟨")
+        .replaceAll("current5", "🟩")
+        .replaceAll("current6", "🟫")
+        .replaceAll("current", "🟦") : "None") + "\n";
     }
 
     private createBag(): Bag[] {

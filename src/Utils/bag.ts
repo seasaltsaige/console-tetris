@@ -9,6 +9,7 @@ export const Tetris: Bag[] = [
         xLength: [2, 3, 2, 3],
         current: 0,
         type: "j",
+        held: false,
     },
     {
         0: ["  ", "current1", "\n", "current1", "current1", "\n", "current1"],
@@ -18,6 +19,7 @@ export const Tetris: Bag[] = [
         xLength: [2, 3, 2, 3],
         current: 0,
         type: "z",
+        held: false,
     },
     {
         0: ["current2", "current2", "\n", "  ", "current2", "\n", "  ", "current2"],
@@ -27,6 +29,7 @@ export const Tetris: Bag[] = [
         xLength: [2, 3, 2, 3],
         current: 0,
         type: "l",
+        held: false,
     },
     {
         0: ["current3", "\n", "current3", "current3", "\n", "  ", "current3"],
@@ -36,6 +39,7 @@ export const Tetris: Bag[] = [
         xLength: [2, 3, 2, 3],
         current: 0,
         type: "s",
+        held: false,
     },
     {
         0: ["current4", "\n", "current4", "\n", "current4", "\n", "current4"],
@@ -45,6 +49,7 @@ export const Tetris: Bag[] = [
         xLength: [1, 4, 1, 4],
         current: 0,
         type: "i",
+        held: false,
     },
     {
         0: ["current5", "current5", "\n", "current5", "current5"],
@@ -54,6 +59,7 @@ export const Tetris: Bag[] = [
         xLength: [2, 2, 2, 2],
         current: 0,
         type: "o",
+        held: false,
     },
     {
         0: ["  ", "current6", "  ", "\n", "current6", "current6", "current6"],
@@ -63,5 +69,6 @@ export const Tetris: Bag[] = [
         xLength: [3, 2, 3, 2],
         current: 0,
         type: "t",
+        held: false,
     },
 ];

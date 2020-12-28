@@ -4,49 +4,57 @@
             "level": 14,
             "name": "Zack",
             "rows": 139,
-            "score": 46880
+            "score": 46880,
+            "type": "no-hold"
         },
         {
             "level": 11,
             "name": "Max!",
             "rows": 101,
-            "score": 30720
+            "score": 30720,
+            "type": "no-hold"
         },
         {
             "level": 11,
             "name": "Maxisthemoose",
             "rows": 109,
-            "score": 59200
+            "score": 59200,
+            "type": "no-hold"
         },
         {
             "level": 9,
             "name": "Max",
             "rows": 85,
-            "score": 22520
+            "score": 22520,
+            "type": "no-hold"
         },
         {
             "level": 9,
             "name": "Max!!",
             "rows": 81,
-            "score": 35300
+            "score": 35300,
+            "type": "no-hold"
         },
         {
             "level": 7,
             "name": "Max",
             "rows": 61,
-            "score": 13880
+            "score": 13880,
+            "type": "no-hold"
         },
         {
             "level": 7,
             "name": "Zack",
             "rows": 47,
-            "score": 12140
+            "score": 12140,
+            "type": "no-hold"
         },
         {
             "level": 13,
             "name": "Max",
             "rows": 126,
-            "score": 95460
+            "score": 95460,
+            "type": "no-hold"
         }
     ]
 }
