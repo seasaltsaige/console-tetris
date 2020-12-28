@@ -80,11 +80,23 @@ export default class Tetris {
             if (key && key.name === "d" && this.#interval !== false) this.move("right");
             if (key && key.name === "s" && this.#interval !== false) this.move("down");
             if (key && key.name === "a" && this.#interval !== false) this.move("left");
+            if (key && key.name === "p") this.pause_resume();
             if (key && key.name === "down" && this.#interval !== false) this.place();
         });
 
         stdin.setRawMode(true);
         stdin.resume();
+    }
+
+    private pause_resume() {
+        if (this.#interval !== false) {
+            clearInterval(<NodeJS.Timeout>this.#interval);
+            this.#interval = false; 
+        } else {
+            this.#interval = setInterval(() => {
+                this.render();
+            }, this.#renderSpeed);
+        }
     }
 
     private score() {
@@ -93,6 +105,18 @@ export default class Tetris {
         const clonedBoard = clone(this.#board);
 
         let rowIndexsToClear: number[] = [];
+
+        for (let j = 0; j < clonedBoard.length; j++) {
+            for (let i = 0; i < clonedBoard[0].length; i++) {
+                if (clonedBoard[j][i] === "current" || 
+                clonedBoard[j][i] === "current1" || 
+                clonedBoard[j][i] === "current2" || 
+                clonedBoard[j][i] === "current3" ||
+                clonedBoard[j][i] === "current4" ||  
+                clonedBoard[j][i] === "current5" || 
+                clonedBoard[j][i] === "current6") clonedBoard[j][i] = "empty";
+            }
+        }
          
         for (let i = 0; i <= 19; i++) {
 
@@ -207,6 +231,7 @@ export default class Tetris {
             this.#currentPosX--;
         }
         else if (dirrection === "down") this.#currentPosY++;
+        else return;
 
 
         let additionalY = 0;

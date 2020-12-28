@@ -1,6 +1,12 @@
 {
     "score": [
         {
+            "level": 14,
+            "name": "Zack",
+            "rows": 139,
+            "score": 46880
+        },
+        {
             "level": 11,
             "name": "Max!",
             "rows": 101,
@@ -37,10 +43,10 @@
             "score": 12140
         },
         {
-            "level": 14,
-            "name": "Zack",
-            "rows": 139,
-            "score": 46880
+            "level": 13,
+            "name": "Max",
+            "rows": 126,
+            "score": 95460
         }
     ]
 }
