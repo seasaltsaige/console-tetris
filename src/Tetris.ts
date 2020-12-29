@@ -338,8 +338,6 @@ export default class Tetris {
 
     private render() {
 
-        // console.log(this.#bag);
-        // console.log(this.#currentPiece);
         const pieceType = this.#currentPiece.type;
         if ((this.#lastPieceType !== pieceType) && !this.#currentPiece.held)
             this.#pieceUsage[pieceType]++;
@@ -348,21 +346,24 @@ export default class Tetris {
 
         const boardClone = clone(this.#board);
 
-        const moduloCheck = this.#level === 1 ? 20 
-            : this.#level === 2 ? 19 
-            : this.#level === 3 ? 18 
-            : this.#level === 4 ? 17
-            : this.#level === 5 ? 16
-            : this.#level === 6 ? 15
-            : this.#level === 7 ? 14
-            : this.#level === 8 ? 13
-            : this.#level === 9 ? 12
-            : this.#level === 10 ? 10
+        const moduloCheck = this.#level === 0 ? 20 
+            : this.#level === 1 ? 19 
+            : this.#level === 2 ? 18 
+            : this.#level === 3 ? 17
+            : this.#level === 4 ? 16
+            : this.#level === 5 ? 15
+            : this.#level === 6 ? 14
+            : this.#level === 7 ? 13
+            : this.#level === 8 ? 12
+            : this.#level === 9 ? 10
+            : this.#level === 10 ? 9
             : this.#level === 11 ? 8
             : this.#level === 12 ? 7
             : this.#level === 13 ? 6
-            : this.#level === 14 ? 4
-            : this.#level === 15 ? 2
+            : this.#level === 14 ? 5
+            : this.#level === 15 ? 4
+            : this.#level === 16 ? 3
+            : this.#level === 17 ? 2
             : 1
 
         for (let j = 0; j < boardClone.length; j++) {
