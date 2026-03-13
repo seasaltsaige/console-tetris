@@ -7,7 +7,7 @@ Yeah of course! Just follow the steps for installing it on your own computer!
 - Make sure you have [Git](https://git-scm.com/) installed on your computer and it is properly set up in your PATH.
 - I would highly recommend using either the [Windows Terminal](https://github.com/seasaltsaige/console-tetris), as it supports the rendering of emojis in the window, or finding a terminal that will correctly render emojis. If you dont do so, you will be very underwhelmed with the results.
 ```cmd
-$ git clone https://github.com/Maxisthemoose/console-tetris.git
+$ git clone https://github.com/seasaltsaige/console-tetris.git
 $ cd console-tetris
 $ npm install
 $ npm start
@@ -24,4 +24,4 @@ To move the pieces left and right, use the A and D keys. To hard drop a piece, p
 
 And that should basically be it! Enjoy your classic game of Tetris!
 ![Image](https://cdn.discordapp.com/attachments/789254471887618089/791429105484431360/unknown.png)
-- Made with love from Maxisthemoose
+- Made with love from seasaltsaige
